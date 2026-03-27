@@ -8,9 +8,8 @@ from typing import List
 
 router = APIRouter()
 
-@router.post("/", response_model=CourseSchema)
-def create_course(course: CourseCreate, token: str = None, db: Session = Depends(get_db)):
-    current_user = get_current_user(token, db)
+@router.post("/", response_model=CourseSchema, status_code=status.HTTP_201_CREATED)
+def create_course(course: CourseCreate, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
     db_course = Course(
         user_id=current_user.id,
         **course.dict()
@@ -21,14 +20,12 @@ def create_course(course: CourseCreate, token: str = None, db: Session = Depends
     return db_course
 
 @router.get("/", response_model=List[CourseSchema])
-def get_courses(token: str = None, db: Session = Depends(get_db)):
-    current_user = get_current_user(token, db)
+def get_courses(current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
     courses = db.query(Course).filter(Course.user_id == current_user.id).all()
     return courses
 
 @router.get("/{course_id}", response_model=CourseSchema)
-def get_course(course_id: int, token: str = None, db: Session = Depends(get_db)):
-    current_user = get_current_user(token, db)
+def get_course(course_id: int, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
     course = db.query(Course).filter(
         (Course.id == course_id) & (Course.user_id == current_user.id)
     ).first()
@@ -41,8 +38,7 @@ def get_course(course_id: int, token: str = None, db: Session = Depends(get_db))
     return course
 
 @router.put("/{course_id}", response_model=CourseSchema)
-def update_course(course_id: int, course_update: CourseUpdate, token: str = None, db: Session = Depends(get_db)):
-    current_user = get_current_user(token, db)
+def update_course(course_id: int, course_update: CourseUpdate, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
     course = db.query(Course).filter(
         (Course.id == course_id) & (Course.user_id == current_user.id)
     ).first()
@@ -61,8 +57,7 @@ def update_course(course_id: int, course_update: CourseUpdate, token: str = None
     return course
 
 @router.delete("/{course_id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_course(course_id: int, token: str = None, db: Session = Depends(get_db)):
-    current_user = get_current_user(token, db)
+def delete_course(course_id: int, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
     course = db.query(Course).filter(
         (Course.id == course_id) & (Course.user_id == current_user.id)
     ).first()

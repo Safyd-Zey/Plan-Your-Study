@@ -60,6 +60,9 @@ interface DataStore {
   courses: Course[];
   assignments: Assignment[];
   selectedCourse: Course | null;
+  upcomingAssignments: Assignment[];
+  overdueAssignments: Assignment[];
+  calendar: Array<{ date: string; assignments: Assignment[]; study_sessions: any[] }>;
   isLoading: boolean;
   error: string | null;
   
@@ -74,6 +77,9 @@ interface DataStore {
   addAssignment: (assignment: Omit<Assignment, 'id' | 'user_id' | 'created_at' | 'updated_at' | 'subtasks'>) => Promise<void>;
   updateAssignment: (id: number, assignment: Partial<Assignment>) => Promise<void>;
   deleteAssignment: (id: number) => Promise<void>;
+  fetchUpcomingAssignments: () => Promise<void>;
+  fetchOverdueAssignments: () => Promise<void>;
+  fetchCalendarMonth: (month: string) => Promise<{ month: string; days: Array<{ date: string; assignments: Assignment[]; study_sessions: any[] }>; assignments: Assignment[]; study_sessions: any[] }>;
   
   // Subtasks
   addSubtask: (assignmentId: number, subtask: Omit<Subtask, 'id' | 'assignment_id' | 'created_at' | 'updated_at' | 'order'>) => Promise<void>;
@@ -133,6 +139,9 @@ export const useAuthStore = create<AuthStore>((set) => ({
 export const useDataStore = create<DataStore>((set, get) => ({
   courses: [],
   assignments: [],
+  upcomingAssignments: [],
+  overdueAssignments: [],
+  calendar: [] as any[],
   selectedCourse: null,
   isLoading: false,
   error: null,
@@ -237,6 +246,44 @@ export const useDataStore = create<DataStore>((set, get) => ({
     try {
       await apiClient.delete(`/assignments/${id}`);
       set((state) => ({ assignments: state.assignments.filter((a) => a.id !== id) }));
+    } catch (error: any) {
+      set({ error: error.message });
+      throw error;
+    } finally {
+      set({ isLoading: false });
+    }
+  },
+
+  fetchUpcomingAssignments: async () => {
+    set({ isLoading: true, error: null });
+    try {
+      const response = await apiClient.get('/assignments/upcoming');
+      set({ upcomingAssignments: response.data });
+    } catch (error: any) {
+      set({ error: error.message });
+    } finally {
+      set({ isLoading: false });
+    }
+  },
+
+  fetchOverdueAssignments: async () => {
+    set({ isLoading: true, error: null });
+    try {
+      const response = await apiClient.get('/assignments/overdue');
+      set({ overdueAssignments: response.data });
+    } catch (error: any) {
+      set({ error: error.message });
+    } finally {
+      set({ isLoading: false });
+    }
+  },
+
+  fetchCalendarMonth: async (month: string) => {
+    set({ isLoading: true, error: null });
+    try {
+      const response = await apiClient.get(`/schedule/calendar?month=${month}`);
+      set({ calendar: response.data.days });
+      return response.data;
     } catch (error: any) {
       set({ error: error.message });
       throw error;

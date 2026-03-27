@@ -34,3 +34,21 @@ def get_progress_stats(token: str = None, db: Session = Depends(get_db)):
         "completion_percentage": completion_percentage,
         "upcoming_deadlines": upcoming[:5]  # Top 5 upcoming
     }
+
+
+@router.get("/detail", response_model=dict)
+def get_progress_detail(token: str = None, db: Session = Depends(get_db)):
+    current_user = get_current_user(token, db)
+
+    assignments = db.query(Assignment).filter(Assignment.user_id == current_user.id).all()
+
+    now = datetime.utcnow()
+    overdue = [a for a in assignments if a.deadline < now and a.status != TaskStatus.COMPLETED]
+    today = [a for a in assignments if a.deadline.date() == now.date()]
+
+    return {
+        "total_assignments": len(assignments),
+        "overdue_assignments": len(overdue),
+        "today_assignments": len(today),
+        "upcoming_assignments": len([a for a in assignments if a.deadline > now and a.status != TaskStatus.COMPLETED])
+    }

@@ -53,8 +53,13 @@ class SubtaskBase(BaseModel):
 class SubtaskCreate(SubtaskBase):
     pass
 
-class SubtaskUpdate(SubtaskBase):
-    pass
+class SubtaskUpdate(BaseModel):
+    title: Optional[str] = None
+    description: Optional[str] = None
+    status: Optional[TaskStatus] = None
+
+class SubtaskStatusUpdate(BaseModel):
+    status: TaskStatus
 
 class Subtask(SubtaskBase):
     id: int
@@ -77,8 +82,16 @@ class AssignmentBase(BaseModel):
 class AssignmentCreate(AssignmentBase):
     course_id: int
 
-class AssignmentUpdate(AssignmentBase):
-    pass
+class AssignmentUpdate(BaseModel):
+    title: Optional[str] = None
+    description: Optional[str] = None
+    deadline: Optional[datetime] = None
+    priority: Optional[PriorityLevel] = None
+    status: Optional[TaskStatus] = None
+    course_id: Optional[int] = None
+
+class AssignmentStatusUpdate(BaseModel):
+    status: TaskStatus
 
 class Assignment(AssignmentBase):
     id: int
@@ -118,6 +131,11 @@ class Token(BaseModel):
     access_token: str
     token_type: str
     user: User
+
+class TokenWithUser(Token):
+    id: int
+    email: EmailStr
+    username: str
 
 class TokenData(BaseModel):
     email: Optional[str] = None

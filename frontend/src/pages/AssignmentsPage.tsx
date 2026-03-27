@@ -13,14 +13,19 @@ export default function AssignmentsPage() {
     description: '',
     deadline: '',
     priority: 'medium' as const,
+    status: 'not_started' as const,
     course_id: 0,
   });
 
   const {
     courses,
     assignments,
+    upcomingAssignments,
+    overdueAssignments,
     fetchCourses,
     fetchAssignments,
+    fetchUpcomingAssignments,
+    fetchOverdueAssignments,
     addAssignment,
     updateAssignment,
     deleteAssignment,
@@ -33,6 +38,8 @@ export default function AssignmentsPage() {
   useEffect(() => {
     fetchCourses();
     fetchAssignments();
+    fetchUpcomingAssignments();
+    fetchOverdueAssignments();
   }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -51,6 +58,7 @@ export default function AssignmentsPage() {
         }
         await addAssignment({
           ...formData,
+          status: 'not_started',
           deadline: new Date(formData.deadline).toISOString(),
         });
       }
@@ -59,6 +67,7 @@ export default function AssignmentsPage() {
         description: '',
         deadline: '',
         priority: 'medium',
+        status: 'not_started',
         course_id: 0,
       });
       setShowForm(false);
@@ -78,10 +87,21 @@ export default function AssignmentsPage() {
         status: 'not_started',
       });
       setNewSubtaskTitle({ ...newSubtaskTitle, [assignmentId]: '' });
+      await fetchAssignments();
     } catch (error) {
       console.error('Error:', error);
     }
   };
+
+  const handleAssignmentStatusChange = async (assignmentId: number, status: 'not_started' | 'in_progress' | 'completed') => {
+    try {
+      await updateAssignment(assignmentId, { status });
+      await fetchAssignments();
+    } catch (error) {
+      console.error('Error changing assignment status:', error);
+    }
+  };
+
 
   const priorityColors = {
     high: 'bg-red-100 text-red-800',
@@ -112,6 +132,22 @@ export default function AssignmentsPage() {
             <Plus size={20} />
             New Assignment
           </button>
+        </div>
+
+        {/* Status Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+          <div className="bg-white p-4 rounded-lg shadow">
+            <p className="text-lg font-semibold text-gray-800">Upcoming</p>
+            <p className="text-3xl font-bold text-blue-600">{upcomingAssignments.length}</p>
+          </div>
+          <div className="bg-white p-4 rounded-lg shadow">
+            <p className="text-lg font-semibold text-gray-800">Overdue</p>
+            <p className="text-3xl font-bold text-red-600">{overdueAssignments.length}</p>
+          </div>
+          <div className="bg-white p-4 rounded-lg shadow">
+            <p className="text-lg font-semibold text-gray-800">Total</p>
+            <p className="text-3xl font-bold text-gray-800">{assignments.length}</p>
+          </div>
         </div>
 
         {/* Form */}
@@ -207,6 +243,7 @@ export default function AssignmentsPage() {
                       description: '',
                       deadline: '',
                       priority: 'medium',
+                      status: 'not_started',
                       course_id: 0,
                     });
                   }}
@@ -281,11 +318,15 @@ export default function AssignmentsPage() {
                                 <input
                                   type="checkbox"
                                   checked={subtask.status === 'completed'}
-                                  onChange={(e) =>
-                                    updateSubtask(subtask.id, {
-                                      status: e.target.checked ? 'completed' : 'not_started',
-                                    })
-                                  }
+                                  onChange={async (e) => {
+                                    try {
+                                      const newStatus = e.target.checked ? 'completed' : 'not_started';
+                                      await updateSubtask(subtask.id, { status: newStatus });
+                                      await fetchAssignments();
+                                    } catch (error) {
+                                      console.error('Error updating subtask status:', error);
+                                    }
+                                  }}
                                   className="w-4 h-4 text-blue-600"
                                 />
                                 <span className={subtask.status === 'completed' ? 'line-through text-gray-500' : 'text-gray-900'}>
@@ -332,7 +373,22 @@ export default function AssignmentsPage() {
                       </div>
 
                       {/* Action Buttons */}
-                      <div className="flex gap-2 justify-end">
+                      <div className="flex items-center gap-2 justify-end">
+                        {assignment.status !== 'completed' ? (
+                          <button
+                            onClick={() => handleAssignmentStatusChange(assignment.id, assignment.status === 'not_started' ? 'in_progress' : 'completed')}
+                            className="px-3 py-1 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg"
+                          >
+                            {assignment.status === 'not_started' ? 'Start' : 'Mark Completed'}
+                          </button>
+                        ) : (
+                          <button
+                            onClick={() => handleAssignmentStatusChange(assignment.id, 'not_started')}
+                            className="px-3 py-1 text-sm font-medium text-white bg-yellow-500 hover:bg-yellow-600 rounded-lg"
+                          >
+                            Reopen
+                          </button>
+                        )}
                         <button
                           onClick={() => deleteAssignment(assignment.id)}
                           className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition"

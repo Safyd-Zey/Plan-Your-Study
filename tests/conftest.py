@@ -145,8 +145,10 @@ def authenticated_user(client, test_user_data):
 
 
 @pytest.fixture
-def authenticated_user_2(client, test_user_data_2):
+def authenticated_user_2(test_db, test_user_data_2):
     """Create and authenticate a second user"""
+    client = TestClient(app)
+
     # Register user
     client.post("/api/auth/register", json=test_user_data_2)
     
