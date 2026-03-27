@@ -1,0 +1,42 @@
+[
+  {
+    "id": 1,
+    "assignment_id": 1,
+    "title": "Read Chapter 1",
+    "description": "Read chapter 1 thoroughly",
+    "status": "completed",
+    "created_at": "2024-03-21T10:30:00"
+  },
+  {
+    "id": 2,
+    "assignment_id": 1,
+    "title": "Practice Exercises 1.1-1.5",
+    "description": "Complete practice exercises",
+    "status": "completed",
+    "created_at": "2024-03-21T10:35:00"
+  },
+  {
+    "id": 3,
+    "assignment_id": 1,
+    "title": "Practice Exercises 1.6-1.10",
+    "description": "Complete remaining exercises",
+    "status": "in_progress",
+    "created_at": "2024-03-21T10:40:00"
+  },
+  {
+    "id": 4,
+    "assignment_id": 2,
+    "title": "Design project structure",
+    "description": "Plan and design project structure",
+    "status": "pending",
+    "created_at": "2024-03-21T11:00:00"
+  },
+  {
+    "id": 5,
+    "assignment_id": 2,
+    "title": "Implement core functionality",
+    "description": "Implement main features",
+    "status": "pending",
+    "created_at": "2024-03-21T11:05:00"
+  }
+]

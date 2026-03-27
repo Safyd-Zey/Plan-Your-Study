@@ -1,0 +1,165 @@
+### Variables
+@baseUrl = http://localhost:8000/api
+@token = YOUR_JWT_TOKEN_HERE
+@email = test@example.com
+@password = TestPassword123!
+
+### 1. AUTHENTICATION TESTS
+
+### Register User
+POST {{baseUrl}}/auth/register
+Content-Type: application/json
+
+{
+  "email": "{{email}}",
+  "username": "testuser",
+  "password": "{{password}}"
+}
+
+### 2. Login User (Copy token from response to @token variable)
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "{{email}}",
+  "password": "{{password}}"
+}
+
+### 3. Get Current User
+GET {{baseUrl}}/auth/me
+Authorization: Bearer {{token}}
+
+### COURSES TESTS
+
+### 4. Create Course
+POST {{baseUrl}}/courses
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "name": "Introduction to Python",
+  "description": "Learn Python programming basics",
+  "instructor": "Dr. Smith"
+}
+
+### 5. Get All Courses
+GET {{baseUrl}}/courses
+Authorization: Bearer {{token}}
+
+### 6. Get Course by ID
+GET {{baseUrl}}/courses/1
+Authorization: Bearer {{token}}
+
+### 7. Update Course
+PUT {{baseUrl}}/courses/1
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "name": "Advanced Python",
+  "description": "Learn advanced Python concepts",
+  "instructor": "Dr. Smith"
+}
+
+### 8. Delete Course
+DELETE {{baseUrl}}/courses/1
+Authorization: Bearer {{token}}
+
+### ASSIGNMENTS TESTS
+
+### 9. Create Assignment
+POST {{baseUrl}}/assignments
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "course_id": 1,
+  "title": "Chapter 5 Exercises",
+  "description": "Complete all exercises from chapter 5",
+  "deadline": "2024-04-15T23:59:59",
+  "priority": "high"
+}
+
+### 10. Get All Assignments
+GET {{baseUrl}}/assignments
+Authorization: Bearer {{token}}
+
+### 11. Get Assignment by ID
+GET {{baseUrl}}/assignments/1
+Authorization: Bearer {{token}}
+
+### 12. Update Assignment
+PUT {{baseUrl}}/assignments/1
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "title": "Chapter 5 & 6 Exercises",
+  "description": "Complete exercises from chapters 5-6",
+  "deadline": "2024-04-20T23:59:59",
+  "priority": "medium"
+}
+
+### 13. Delete Assignment
+DELETE {{baseUrl}}/assignments/1
+Authorization: Bearer {{token}}
+
+### SUBTASKS TESTS
+
+### 14. Create Subtask
+POST {{baseUrl}}/subtasks
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "assignment_id": 1,
+  "title": "Read Chapter 5",
+  "description": "Read chapter 5 completely",
+  "status": "pending"
+}
+
+### 15. Get All Subtasks
+GET {{baseUrl}}/subtasks
+Authorization: Bearer {{token}}
+
+### 16. Get Subtask by ID
+GET {{baseUrl}}/subtasks/1
+Authorization: Bearer {{token}}
+
+### PROGRESS TESTS
+
+### 17. Get Progress Statistics
+GET {{baseUrl}}/progress
+Authorization: Bearer {{token}}
+
+### SCHEDULE TESTS
+
+### 18. Get Daily Schedule
+GET {{baseUrl}}/schedule/daily
+Authorization: Bearer {{token}}
+
+### 19. Get Weekly Schedule
+GET {{baseUrl}}/schedule/weekly
+Authorization: Bearer {{token}}
+
+### ERROR CASES
+
+### 20. Unauthorized Access (no token)
+GET {{baseUrl}}/courses
+
+### 21. Invalid Token
+GET {{baseUrl}}/courses
+Authorization: Bearer invalid_token_here
+
+### 22. Not Found
+GET {{baseUrl}}/courses/999
+Authorization: Bearer {{token}}
+
+### 23. Bad Request (missing required field)
+POST {{baseUrl}}/courses
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "description": "Missing name field"
+}

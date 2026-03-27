@@ -1,0 +1,46 @@
+[
+  {
+    "id": 1,
+    "user_id": 1,
+    "course_id": 1,
+    "title": "Chapter 1 Exercises",
+    "description": "Complete all exercises from chapter 1",
+    "deadline": "2024-04-05T23:59:59",
+    "priority": "high",
+    "status": "pending",
+    "created_at": "2024-03-21T10:30:00"
+  },
+  {
+    "id": 2,
+    "user_id": 1,
+    "course_id": 1,
+    "title": "Chapter 2 Project",
+    "description": "Build a simple Python project",
+    "deadline": "2024-04-12T23:59:59",
+    "priority": "medium",
+    "status": "pending",
+    "created_at": "2024-03-21T11:00:00"
+  },
+  {
+    "id": 3,
+    "user_id": 1,
+    "course_id": 2,
+    "title": "Data Analysis Report",
+    "description": "Analyze provided dataset and write report",
+    "deadline": "2024-04-15T23:59:59",
+    "priority": "high",
+    "status": "in_progress",
+    "created_at": "2024-03-21T11:30:00"
+  },
+  {
+    "id": 4,
+    "user_id": 2,
+    "course_id": 3,
+    "title": "Portfolio Website",
+    "description": "Create a personal portfolio website",
+    "deadline": "2024-04-30T23:59:59",
+    "priority": "high",
+    "status": "pending",
+    "created_at": "2024-03-21T12:00:00"
+  }
+]

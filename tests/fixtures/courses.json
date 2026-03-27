@@ -1,0 +1,26 @@
+[
+  {
+    "id": 1,
+    "user_id": 1,
+    "name": "Introduction to Python",
+    "description": "Learn Python basics and fundamentals",
+    "instructor": "Dr. Smith",
+    "created_at": "2024-03-21T10:00:00"
+  },
+  {
+    "id": 2,
+    "user_id": 1,
+    "name": "Data Science 101",
+    "description": "Introduction to data science concepts",
+    "instructor": "Dr. Johnson",
+    "created_at": "2024-03-21T11:00:00"
+  },
+  {
+    "id": 3,
+    "user_id": 2,
+    "name": "Web Development",
+    "description": "Build modern web applications",
+    "instructor": "Dr. Williams",
+    "created_at": "2024-03-21T12:00:00"
+  }
+]
