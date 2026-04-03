@@ -45,7 +45,7 @@ jobs:
     - name: Run tests with coverage
       working-directory: ./backend
       run: |
-        pytest ../tests/ -v --cov=backend --cov-report=xml --cov-report=html --cov-report=term --cov-fail-under=80
+        pytest ../tests/ -v --cov=. --cov-report=xml --cov-report=html --cov-report=term --cov-fail-under=80
         # --cov-fail-under=80 will fail if coverage < 80%
 
     - name: Move coverage reports to root
