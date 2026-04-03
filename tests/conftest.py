@@ -117,7 +117,7 @@ def test_subtask_data():
     return {
         "title": "Read Chapter 5",
         "description": "Read chapter 5 thoroughly",
-        "status": "pending"
+        "status": "not_started"
     }
 
 

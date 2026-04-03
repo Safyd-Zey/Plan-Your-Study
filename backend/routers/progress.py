@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from database import get_db
-from models import Assignment, TaskStatus
+from models import Assignment, TaskStatus, User
 from schemas import ProgressStats
 from routers.auth import get_current_user
 from datetime import datetime
@@ -9,9 +9,7 @@ from datetime import datetime
 router = APIRouter()
 
 @router.get("/stats", response_model=ProgressStats)
-def get_progress_stats(token: str = None, db: Session = Depends(get_db)):
-    current_user = get_current_user(token, db)
-    
+def get_progress_stats(current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
     assignments = db.query(Assignment).filter(Assignment.user_id == current_user.id).all()
     
     total = len(assignments)
@@ -37,9 +35,7 @@ def get_progress_stats(token: str = None, db: Session = Depends(get_db)):
 
 
 @router.get("/detail", response_model=dict)
-def get_progress_detail(token: str = None, db: Session = Depends(get_db)):
-    current_user = get_current_user(token, db)
-
+def get_progress_detail(current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
     assignments = db.query(Assignment).filter(Assignment.user_id == current_user.id).all()
 
     now = datetime.utcnow()

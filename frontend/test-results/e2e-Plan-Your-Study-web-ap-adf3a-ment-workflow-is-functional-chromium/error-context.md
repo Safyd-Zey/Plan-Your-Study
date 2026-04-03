@@ -1,0 +1,41 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e5]:
+  - heading "Create Account" [level=1] [ref=e6]
+  - generic [ref=e7]: Registration failed. Please try again.
+  - generic [ref=e8]:
+    - generic [ref=e9]:
+      - generic [ref=e10]: Username
+      - generic [ref=e11]:
+        - img [ref=e12]
+        - textbox "Username" [ref=e15]:
+          - /placeholder: john_doe
+          - text: user-playwright-1774971975510-773
+    - generic [ref=e16]:
+      - generic [ref=e17]: Email Address
+      - generic [ref=e18]:
+        - img [ref=e19]
+        - textbox "Email Address" [ref=e22]:
+          - /placeholder: your@email.com
+          - text: playwright+playwright-1774971975510-773@example.com
+    - generic [ref=e23]:
+      - generic [ref=e24]: Password
+      - generic [ref=e25]:
+        - img [ref=e26]
+        - textbox "Password" [ref=e29]:
+          - /placeholder: ••••••••
+          - text: StrongPass123!
+    - generic [ref=e30]:
+      - generic [ref=e31]: Confirm Password
+      - generic [ref=e32]:
+        - img [ref=e33]
+        - textbox "Confirm Password" [ref=e36]:
+          - /placeholder: ••••••••
+          - text: StrongPass123!
+    - button "Create Account" [ref=e37] [cursor=pointer]
+  - generic [ref=e38]:
+    - text: Already have an account?
+    - link "Sign in here" [ref=e39] [cursor=pointer]:
+      - /url: /login
+```

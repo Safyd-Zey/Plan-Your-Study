@@ -8,7 +8,7 @@ from typing import List
 
 router = APIRouter()
 
-@router.post("/", response_model=SubtaskSchema)
+@router.post("/{assignment_id}", response_model=SubtaskSchema)
 def create_subtask(assignment_id: int, subtask: SubtaskCreate, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
     assignment = db.query(Assignment).filter(
         (Assignment.id == assignment_id) & (Assignment.user_id == current_user.id)
