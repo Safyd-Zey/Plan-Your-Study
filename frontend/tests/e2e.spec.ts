@@ -71,4 +71,83 @@ test.describe('Plan Your Study web application', () => {
     await page.click('button:has-text("Start")');
     await expect(page.locator('button:has-text("Mark Completed")')).toBeVisible();
   });
+
+  test('login with valid credentials works', async ({ page }) => {
+    const uniqueId = makeUnique('playwright');
+    const username = `user-${uniqueId}`;
+    const email = `playwright+${uniqueId}@example.com`;
+    const password = 'StrongPass123!';
+
+    // Register first
+    await page.goto('/register');
+    await page.fill('#username', username);
+    await page.fill('#email', email);
+    await page.fill('#password', password);
+    await page.fill('#confirmPassword', password);
+    await page.click('button:has-text("Create Account")');
+    await page.waitForURL(/.*\/dashboard$/);
+
+    // Logout
+    await page.click('button:has-text("Logout")');
+    await page.waitForURL(/.*\/login$/);
+
+    // Login
+    await page.fill('#email', email);
+    await page.fill('#password', password);
+    await page.click('button:has-text("Login")');
+
+    await page.waitForURL(/.*\/dashboard$/);
+    await expect(page.locator('text=Welcome back,')).toContainText(username);
+  });
+
+  test('login with invalid credentials fails', async ({ page }) => {
+    await page.goto('/login');
+    await page.fill('#email', 'invalid@example.com');
+    await page.fill('#password', 'wrongpassword');
+    await page.click('button:has-text("Login")');
+
+    await expect(page.locator('text=Invalid credentials')).toBeVisible();
+    await expect(page).toHaveURL(/.*\/login$/);
+  });
+
+  test('assignment progress tracking works', async ({ page }) => {
+    const uniqueId = makeUnique('playwright');
+    const username = `user-${uniqueId}`;
+    const email = `playwright+${uniqueId}@example.com`;
+    const password = 'StrongPass123!';
+    const courseName = `Progress Course ${uniqueId}`;
+    const assignmentTitle = `Progress Assignment ${uniqueId}`;
+    const deadline = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString().slice(0, 16);
+
+    // Register and create course/assignment
+    await page.goto('/register');
+    await page.fill('#username', username);
+    await page.fill('#email', email);
+    await page.fill('#password', password);
+    await page.fill('#confirmPassword', password);
+    await page.click('button:has-text("Create Account")');
+    await page.waitForURL(/.*\/dashboard$/);
+
+    await page.click('a:has-text("Courses")');
+    await page.click('button:has-text("New Course")');
+    await page.fill('input[placeholder="e.g., Mathematics 101"]', courseName);
+    await page.fill('textarea[placeholder="Course description"]', 'Course for progress testing');
+    await page.fill('input[placeholder="e.g., Dr. John Smith"]', 'Professor Progress');
+    await page.click('button:has-text("Add Course")');
+
+    await page.click('a:has-text("Assignments")');
+    await page.click('button:has-text("New Assignment")');
+    await page.locator('select').first().selectOption({ label: courseName });
+    await page.fill('input[placeholder="Assignment title"]', assignmentTitle);
+    await page.fill('textarea[placeholder="Assignment description"]', 'Assignment for progress tracking');
+    await page.fill('input[type="datetime-local"]', deadline);
+    await page.locator('select').nth(1).selectOption('medium');
+    await page.click('button:has-text("Create")');
+
+    // Go to progress page
+    await page.click('a:has-text("Progress")');
+    await page.waitForURL(/.*\/progress$/);
+    await expect(page.locator(`text=${assignmentTitle}`)).toBeVisible();
+    await expect(page.locator('text=Not Started')).toBeVisible();
+  });
 });
