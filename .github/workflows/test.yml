@@ -42,16 +42,16 @@ jobs:
         pip install pytest pytest-cov
 
     # Устанавливаем рабочую директорию в backend, чтобы pytest видел package
-    - name: Run tests
+    - name: Run tests with coverage
       working-directory: ./backend
       run: |
-        pytest ../tests/ -v --cov=backend --cov-report=xml --cov-report=term
-        # ../tests/ потому что тесты лежат на уровень выше backend
-    
-    - name: Check coverage threshold
+        pytest ../tests/ -v --cov=backend --cov-report=xml --cov-report=html --cov-report=term --cov-fail-under=80
+        # --cov-fail-under=80 will fail if coverage < 80%
+
+    - name: Move coverage reports to root
       run: |
-        coverage report --fail-under=80
-      working-directory: ./backend
+        mv backend/coverage.xml . 2>/dev/null || true
+        mv backend/htmlcov . 2>/dev/null || true
 
     - name: Upload coverage reports
       uses: codecov/codecov-action@v3
