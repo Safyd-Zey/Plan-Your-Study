@@ -25,14 +25,18 @@ FastAPI backend for the "Plan Your Study" application - a comprehensive study pl
 - Python 3.8+
 - pip or conda
 
+### Important Notes
+- **Run from project root**: All commands must be run from the project root directory, not from the backend folder, due to absolute import paths
+- **Virtual environment**: Ensure the virtual environment is activated before running commands
+
 ### Setup Steps
 
-1. **Navigate to backend directory**
+1. **Navigate to project root**
    ```bash
-   cd backend
+   cd path/to/Plan-Your-Study  # Project root, not backend folder
    ```
 
-2. **Create virtual environment**
+2. **Create virtual environment** (if not already created)
    ```bash
    python -m venv venv
    source venv/bin/activate  # On Windows: venv\Scripts\activate
@@ -40,7 +44,7 @@ FastAPI backend for the "Plan Your Study" application - a comprehensive study pl
 
 3. **Install dependencies**
    ```bash
-   pip install -r requirements.txt
+   pip install -r backend/requirements.txt
    ```
 
 4. **Setup environment variables**
@@ -51,7 +55,9 @@ FastAPI backend for the "Plan Your Study" application - a comprehensive study pl
 
 5. **Run the server**
    ```bash
-   python main.py
+   # From PROJECT ROOT (not from backend directory!)
+   cd ..
+   python -m uvicorn backend.main:app --host 127.0.0.1 --port 8000 --reload
    ```
    The API will be available at `http://localhost:8000`
 
