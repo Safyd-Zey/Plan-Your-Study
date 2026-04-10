@@ -1,9 +1,9 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
-from database import get_db
-from models import Assignment, StudySession, User
-from schemas import Assignment as AssignmentSchema, StudySession as StudySessionSchema, StudySessionCreate
-from routers.auth import get_current_user
+from backend.database import get_db
+from backend.models import Assignment, StudySession, User
+from backend.schemas import Assignment as AssignmentSchema, StudySession as StudySessionSchema, StudySessionCreate
+from backend.routers.auth import get_current_user
 from typing import List
 from datetime import datetime, timedelta
 

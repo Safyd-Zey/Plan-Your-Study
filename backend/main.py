@@ -1,8 +1,9 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-from database import Base, engine
-from routers import auth, courses, assignments, subtasks, progress, schedule
+from backend.database import Base, engine
+from backend import routers
+from backend.routers import auth, courses, assignments, subtasks, progress, schedule
 import os
 
 # Create tables

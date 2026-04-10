@@ -1,7 +1,7 @@
 from pydantic import BaseModel, EmailStr
 from typing import Optional, List
 from datetime import datetime
-from models import PriorityLevel, TaskStatus
+from backend.models import PriorityLevel, TaskStatus
 
 # User Schemas
 class UserBase(BaseModel):

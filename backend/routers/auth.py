@@ -3,10 +3,10 @@ from sqlalchemy.orm import Session
 from datetime import datetime, timedelta
 from jose import JWTError, jwt
 from passlib.context import CryptContext
-from database import get_db
-from models import User
-from schemas import UserCreate, UserLogin, Token, TokenWithUser, User as UserSchema
-from config import settings
+from backend.database import get_db
+from backend.models import User
+from backend.schemas import UserCreate, UserLogin, Token, TokenWithUser, User as UserSchema
+from backend.config import settings
 from typing import Optional
 
 router = APIRouter()
