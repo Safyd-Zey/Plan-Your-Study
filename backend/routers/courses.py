@@ -1,9 +1,9 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
-from backend.database import get_db
-from backend.models import Course, User
-from backend.schemas import Course as CourseSchema, CourseCreate, CourseUpdate
-from backend.routers.auth import get_current_user
+from database import get_db
+from models import Course, User
+from schemas import Course as CourseSchema, CourseCreate, CourseUpdate
+from routers.auth import get_current_user
 from typing import List
 
 router = APIRouter()
