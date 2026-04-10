@@ -296,7 +296,7 @@ export const useDataStore = create<DataStore>((set, get) => ({
   addSubtask: async (assignmentId, subtask) => {
     set({ isLoading: true, error: null });
     try {
-      const response = await apiClient.post(`/subtasks/?assignment_id=${assignmentId}`, subtask);
+      const response = await apiClient.post(`/subtasks/${assignmentId}`, subtask);
       set((state) => ({
         assignments: state.assignments.map((a) =>
           a.id === assignmentId
