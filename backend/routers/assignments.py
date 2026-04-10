@@ -1,10 +1,10 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from sqlalchemy import cast, Date
-from database import get_db
-from models import Assignment, Course, TaskStatus, User
-from schemas import Assignment as AssignmentSchema, AssignmentCreate, AssignmentUpdate, AssignmentWithCourse, AssignmentStatusUpdate
-from routers.auth import get_current_user
+from backend.database import get_db
+from backend.models import Assignment, Course, TaskStatus, User
+from backend.schemas import Assignment as AssignmentSchema, AssignmentCreate, AssignmentUpdate, AssignmentWithCourse, AssignmentStatusUpdate
+from backend.routers.auth import get_current_user
 from typing import List
 from datetime import datetime, timedelta
 
