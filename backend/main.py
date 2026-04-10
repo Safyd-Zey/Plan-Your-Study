@@ -40,6 +40,11 @@ def read_root():
     }
 
 @app.get("/health")
+@app.head("/health")
+def health_check():
+    return {"status": "healthy"}
+
+@app.get("/health")
 def health_check():
     return {"status": "healthy"}
 
