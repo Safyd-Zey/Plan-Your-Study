@@ -103,7 +103,7 @@ class TestMetricsCollector:
         result = self.run_tests()
         
         # Parse coverage
-        coverage = self.parse_coverage_xml("backend/coverage.xml")
+        coverage = self.parse_coverage_xml("coverage.xml")
         if coverage:
             self.send_to_influxdb("coverage", {"percentage": coverage})
             print(f"📈 Coverage: {coverage:.1f}%\n")

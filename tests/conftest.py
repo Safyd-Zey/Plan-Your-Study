@@ -6,17 +6,17 @@ import sys
 import os
 from pathlib import Path
 
-# Add backend to path
-backend_path = Path(__file__).parent.parent / "backend"
-sys.path.insert(0, str(backend_path))
+# Add project root to path for absolute imports
+project_root = Path(__file__).parent.parent
+sys.path.insert(0, str(project_root))
 
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine, event
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
 
-from database import Base, get_db
-from main import app
+from backend.database import Base, get_db
+from backend.main import app
 
 
 # Test database configuration

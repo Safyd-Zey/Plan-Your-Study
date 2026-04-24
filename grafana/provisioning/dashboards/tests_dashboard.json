@@ -9,7 +9,7 @@
       "type": "stat",
       "gridPos": {"h": 8, "w": 6, "x": 0, "y": 0},
       "targets": [{
-        "datasource": {"type": "influxdb", "uid": "InfluxDB"},
+        "datasource": {"type": "influxdb", "uid": "P951FEA4DE68E13C5"},
         "measurement": "test_run",
         "refId": "A",
         "select": [[{"type": "field", "params": ["passed"]}, {"type": "last"}]]
@@ -34,7 +34,7 @@
       "type": "stat",
       "gridPos": {"h": 8, "w": 6, "x": 6, "y": 0},
       "targets": [{
-        "datasource": {"type": "influxdb", "uid": "InfluxDB"},
+        "datasource": {"type": "influxdb", "uid": "P951FEA4DE68E13C5"},
         "measurement": "test_run",
         "refId": "A",
         "select": [[{"type": "field", "params": ["failed"]}, {"type": "last"}]]
@@ -59,7 +59,7 @@
       "type": "stat",
       "gridPos": {"h": 8, "w": 6, "x": 12, "y": 0},
       "targets": [{
-        "datasource": {"type": "influxdb", "uid": "InfluxDB"},
+        "datasource": {"type": "influxdb", "uid": "P951FEA4DE68E13C5"},
         "measurement": "coverage",
         "refId": "A",
         "select": [[{"type": "field", "params": ["percentage"]}, {"type": "last"}]]
@@ -85,7 +85,7 @@
       "type": "timeseries",
       "gridPos": {"h": 8, "w": 12, "x": 0, "y": 8},
       "targets": [{
-        "datasource": {"type": "influxdb", "uid": "InfluxDB"},
+        "datasource": {"type": "influxdb", "uid": "P951FEA4DE68E13C5"},
         "measurement": "test_run",
         "refId": "A",
         "select": [[{"type": "field", "params": ["total"]}]]
@@ -103,7 +103,7 @@
       "type": "stat",
       "gridPos": {"h": 8, "w": 12, "x": 12, "y": 8},
       "targets": [{
-        "datasource": {"type": "influxdb", "uid": "InfluxDB"},
+        "datasource": {"type": "influxdb", "uid": "P951FEA4DE68E13C5"},
         "measurement": "test_run",
         "refId": "A",
         "select": [[{"type": "field", "params": ["total"]}, {"type": "last"}]]
