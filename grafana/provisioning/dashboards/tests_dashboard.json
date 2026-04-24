@@ -1,251 +1,128 @@
 {
   "title": "Plan Your Study - Test Dashboard 📊",
-    "tags": ["tests", "qa", "plan-your-study"],
-    "timezone": "browser",
-    "panels": [
-      {
-        "id": 1,
-        "title": "Test Results Summary",
-        "type": "stat",
-        "gridPos": {
-          "h": 8,
-          "w": 6,
-          "x": 0,
-          "y": 0
-        },
-        "targets": [
-          {
-            "datasource": {
-              "type": "influxdb"
-            },
-            "measurement": "test_run",
-            "select": [
-              [
-                {
-                  "type": "field",
-                  "params": ["value"]
-                }
-              ]
-            ],
-            "where": [
-              {
-                "key": "status",
-                "operator": "=",
-                "value": "passed"
-              }
-            ]
-          }
-        ],
-        "options": {
-          "colorMode": "background",
-          "graphMode": "area",
-          "textMode": "auto",
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "red",
-                "value": null
-              },
-              {
-                "color": "yellow",
-                "value": 50
-              },
-              {
-                "color": "green",
-                "value": 80
-              }
-            ]
-          }
-        }
-      },
-      {
-        "id": 2,
-        "title": "Failed Tests",
-        "type": "stat",
-        "gridPos": {
-          "h": 8,
-          "w": 6,
-          "x": 6,
-          "y": 0
-        },
-        "targets": [
-          {
-            "datasource": {
-              "type": "influxdb"
-            },
-            "measurement": "test_run",
-            "select": [
-              [
-                {
-                  "type": "field",
-                  "params": ["value"]
-                }
-              ]
-            ],
-            "where": [
-              {
-                "key": "status",
-                "operator": "=",
-                "value": "failed"
-              }
-            ]
-          }
-        ],
-        "options": {
-          "colorMode": "background",
-          "graphMode": "area",
-          "textMode": "auto",
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "yellow",
-                "value": 1
-              },
-              {
-                "color": "red",
-                "value": 5
-              }
-            ]
-          }
-        }
-      },
-      {
-        "id": 3,
-        "title": "Code Coverage %",
-        "type": "stat",
-        "gridPos": {
-          "h": 8,
-          "w": 6,
-          "x": 12,
-          "y": 0
-        },
-        "targets": [
-          {
-            "datasource": {
-              "type": "influxdb"
-            },
-            "measurement": "coverage",
-            "select": [
-              [
-                {
-                  "type": "field",
-                  "params": ["percentage"]
-                }
-              ]
-            ]
-          }
-        ],
-        "options": {
-          "colorMode": "background",
-          "graphMode": "area",
-          "textMode": "auto",
-          "unit": "percent",
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "red",
-                "value": null
-              },
-              {
-                "color": "yellow",
-                "value": 60
-              },
-              {
-                "color": "green",
-                "value": 80
-              }
-            ]
-          }
-        }
-      },
-      {
-        "id": 4,
-        "title": "Test Execution Time Trend",
-        "type": "timeseries",
-        "gridPos": {
-          "h": 8,
-          "w": 12,
-          "x": 0,
-          "y": 8
-        },
-        "targets": [
-          {
-            "datasource": {
-              "type": "influxdb"
-            },
-            "measurement": "test_run",
-            "select": [
-              [
-                {
-                  "type": "field",
-                  "params": ["duration_ms"]
-                }
-              ]
-            ]
-          }
-        ],
-        "fieldConfig": {
-          "defaults": {
-            "custom": {
-              "showPoints": "auto"
-            },
-            "color": {
-              "mode": "palette-classic"
-            }
-          }
-        }
-      },
-      {
-        "id": 5,
-        "title": "Test Results Distribution",
-        "type": "piechart",
-        "gridPos": {
-          "h": 8,
-          "w": 12,
-          "x": 12,
-          "y": 8
-        },
-        "targets": [
-          {
-            "datasource": {
-              "type": "influxdb"
-            },
-            "measurement": "test_run",
-            "select": [
-              [
-                {
-                  "type": "count"
-                }
-              ]
-            ],
-            "groupBy": [
-              {
-                "params": ["status"],
-                "type": "tag"
-              }
-            ]
-          }
-        ],
-        "options": {
-          "legend": {
-            "displayMode": "list",
-            "placement": "right"
-          },
-          "pieType": "donut"
+  "tags": ["tests", "qa", "plan-your-study"],
+  "timezone": "browser",
+  "panels": [
+    {
+      "id": 1,
+      "title": "Passed Tests",
+      "type": "stat",
+      "gridPos": {"h": 8, "w": 6, "x": 0, "y": 0},
+      "targets": [{
+        "datasource": {"type": "influxdb", "uid": "InfluxDB"},
+        "measurement": "test_run",
+        "refId": "A",
+        "select": [[{"type": "field", "params": ["passed"]}, {"type": "last"}]]
+      }],
+      "options": {
+        "colorMode": "background",
+        "graphMode": "area",
+        "textMode": "auto",
+        "thresholds": {
+          "mode": "absolute",
+          "steps": [
+            {"color": "red", "value": null},
+            {"color": "yellow", "value": 15},
+            {"color": "green", "value": 20}
+          ]
         }
       }
-    ],
-    "refresh": "30s",
-    "time": {
-      "from": "now-7d",
-      "to": "now"
     },
-  "overwrite": true
+    {
+      "id": 2,
+      "title": "Failed Tests",
+      "type": "stat",
+      "gridPos": {"h": 8, "w": 6, "x": 6, "y": 0},
+      "targets": [{
+        "datasource": {"type": "influxdb", "uid": "InfluxDB"},
+        "measurement": "test_run",
+        "refId": "A",
+        "select": [[{"type": "field", "params": ["failed"]}, {"type": "last"}]]
+      }],
+      "options": {
+        "colorMode": "background",
+        "graphMode": "area",
+        "textMode": "auto",
+        "thresholds": {
+          "mode": "absolute",
+          "steps": [
+            {"color": "green", "value": null},
+            {"color": "yellow", "value": 1},
+            {"color": "red", "value": 3}
+          ]
+        }
+      }
+    },
+    {
+      "id": 3,
+      "title": "Code Coverage %",
+      "type": "stat",
+      "gridPos": {"h": 8, "w": 6, "x": 12, "y": 0},
+      "targets": [{
+        "datasource": {"type": "influxdb", "uid": "InfluxDB"},
+        "measurement": "coverage",
+        "refId": "A",
+        "select": [[{"type": "field", "params": ["percentage"]}, {"type": "last"}]]
+      }],
+      "options": {
+        "colorMode": "background",
+        "graphMode": "area",
+        "textMode": "auto",
+        "unit": "percent",
+        "thresholds": {
+          "mode": "absolute",
+          "steps": [
+            {"color": "red", "value": null},
+            {"color": "yellow", "value": 60},
+            {"color": "green", "value": 80}
+          ]
+        }
+      }
+    },
+    {
+      "id": 4,
+      "title": "Total Tests Over Time",
+      "type": "timeseries",
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 8},
+      "targets": [{
+        "datasource": {"type": "influxdb", "uid": "InfluxDB"},
+        "measurement": "test_run",
+        "refId": "A",
+        "select": [[{"type": "field", "params": ["total"]}]]
+      }],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {"showPoints": "auto", "lineWidth": 2},
+          "color": {"mode": "palette-classic"}
+        }
+      }
+    },
+    {
+      "id": 5,
+      "title": "Test Summary",
+      "type": "stat",
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 8},
+      "targets": [{
+        "datasource": {"type": "influxdb", "uid": "InfluxDB"},
+        "measurement": "test_run",
+        "refId": "A",
+        "select": [[{"type": "field", "params": ["total"]}, {"type": "last"}]]
+      }],
+      "options": {
+        "colorMode": "background",
+        "graphMode": "area",
+        "textMode": "auto",
+        "thresholds": {
+          "mode": "absolute",
+          "steps": [{"color": "blue", "value": null}]
+        }
+      }
+    }
+  ],
+  "refresh": "10s",
+  "time": {"from": "now-7d", "to": "now"},
+  "timezone": "browser",
+  "schemaVersion": 16,
+  "version": 1,
+  "uid": "test-dashboard"
 }
