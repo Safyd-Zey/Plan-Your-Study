@@ -39,19 +39,27 @@ jobs:
         # Устанавливаем все зависимости + pydantic[email] для email validation
         pip install -r backend/requirements.txt
         pip install "pydantic[email]"
-        pip install pytest pytest-cov
+        pip install pytest pytest-cov allure-pytest
 
     # Устанавливаем рабочую директорию в backend, чтобы pytest видел package
-    - name: Run tests with coverage
+    - name: Run tests with coverage and Allure reporting
       working-directory: ./backend
       run: |
-        pytest ../tests/ -v --cov=. --cov-report=xml --cov-report=html --cov-report=term --cov-fail-under=80
+        pytest ../tests/ -v --cov=. --cov-report=xml --cov-report=html --cov-report=term --cov-fail-under=80 --alluredir=../allure-results
         # --cov-fail-under=80 will fail if coverage < 80%
 
-    - name: Move coverage reports to root
+    - name: Generate Allure Report
+      if: always()
+      run: |
+        npm install -g allure-commandline --save-dev
+        allure generate allure-results -o allure-report --clean
+
+    - name: Move coverage and test reports to root
+      if: always()
       run: |
         mv backend/coverage.xml . 2>/dev/null || true
         mv backend/htmlcov . 2>/dev/null || true
+        mv allure-report . 2>/dev/null || true
 
     - name: Upload coverage reports
       uses: codecov/codecov-action@v3
@@ -61,6 +69,17 @@ jobs:
         fail_ci_if_error: false
       env:
         CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+
+    - name: Upload test reports as artifacts
+      if: always()
+      uses: actions/upload-artifact@v3
+      with:
+        name: test-reports-python-${{ matrix.python-version }}
+        path: |
+          allure-report/
+          htmlcov/
+          coverage.xml
+        retention-days: 30
 
   frontend-e2e-tests:
     name: Frontend E2E Playwright Tests
@@ -96,6 +115,14 @@ jobs:
         working-directory: ./frontend
         run: |
           npx playwright test --config=playwright.config.ts
+
+      - name: Upload Playwright reports as artifacts
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: playwright-report
+          path: frontend/playwright-report/
+          retention-days: 30
 
   code-health:
     name: Code Quality

@@ -2,8 +2,14 @@
 Integration tests for API authentication endpoints
 """
 import pytest
+import allure
 
 
+@pytest.mark.integration
+@pytest.mark.auth
+@pytest.mark.critical
+@allure.feature("Authentication")
+@allure.story("User Registration")
 def test_user_registration_success(client, test_user_data):
     """Test successful user registration"""
     response = client.post("/api/auth/register", json=test_user_data)
@@ -15,6 +21,11 @@ def test_user_registration_success(client, test_user_data):
     assert data["username"] == test_user_data["username"]
 
 
+@pytest.mark.integration
+@pytest.mark.auth
+@pytest.mark.critical
+@allure.feature("Authentication")
+@allure.story("User Registration")
 def test_user_registration_duplicate_email(client, test_user_data):
     """Test registration fails with duplicate email"""
     # Register first user
@@ -27,6 +38,11 @@ def test_user_registration_duplicate_email(client, test_user_data):
     assert response.status_code >= 400
 
 
+@pytest.mark.integration
+@pytest.mark.auth
+@pytest.mark.critical
+@allure.feature("Authentication")
+@allure.story("User Login")
 def test_user_login_success(client, test_user_data):
     """Test successful user login"""
     # Register user first
@@ -47,6 +63,10 @@ def test_user_login_success(client, test_user_data):
     assert data["token_type"] == "bearer"
 
 
+@pytest.mark.integration
+@pytest.mark.auth
+@allure.feature("Authentication")
+@allure.story("User Login")
 def test_user_login_wrong_password(client, test_user_data):
     """Test login fails with wrong password"""
     # Register user first
@@ -64,6 +84,10 @@ def test_user_login_wrong_password(client, test_user_data):
     assert response.status_code == 401
 
 
+@pytest.mark.integration
+@pytest.mark.auth
+@allure.feature("Authentication")
+@allure.story("User Login")
 def test_user_login_nonexistent_email(client):
     """Test login fails with nonexistent email"""
     response = client.post(
