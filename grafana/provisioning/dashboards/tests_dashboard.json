@@ -1,7 +1,12 @@
 {
+  "id": 1,
   "title": "Plan Your Study - Test Dashboard 📊",
   "tags": ["tests", "qa", "plan-your-study"],
   "timezone": "browser",
+  "uid": "test-dashboard",
+  "version": 1,
+  "refresh": "10s",
+  "time": {"from": "now-7d", "to": "now"},
   "panels": [
     {
       "id": 1,
@@ -10,9 +15,9 @@
       "gridPos": {"h": 8, "w": 6, "x": 0, "y": 0},
       "targets": [{
         "datasource": {"type": "influxdb", "uid": "P951FEA4DE68E13C5"},
-        "measurement": "test_run",
-        "refId": "A",
-        "select": [[{"type": "field", "params": ["passed"]}, {"type": "last"}]]
+        "rawQuery": true,
+        "query": "SELECT last(passed) FROM test_run",
+        "refId": "A"
       }],
       "options": {
         "colorMode": "background",
@@ -35,9 +40,9 @@
       "gridPos": {"h": 8, "w": 6, "x": 6, "y": 0},
       "targets": [{
         "datasource": {"type": "influxdb", "uid": "P951FEA4DE68E13C5"},
-        "measurement": "test_run",
-        "refId": "A",
-        "select": [[{"type": "field", "params": ["failed"]}, {"type": "last"}]]
+        "rawQuery": true,
+        "query": "SELECT last(failed) FROM test_run",
+        "refId": "A"
       }],
       "options": {
         "colorMode": "background",
@@ -60,9 +65,9 @@
       "gridPos": {"h": 8, "w": 6, "x": 12, "y": 0},
       "targets": [{
         "datasource": {"type": "influxdb", "uid": "P951FEA4DE68E13C5"},
-        "measurement": "coverage",
-        "refId": "A",
-        "select": [[{"type": "field", "params": ["percentage"]}, {"type": "last"}]]
+        "rawQuery": true,
+        "query": "SELECT last(percentage) FROM coverage",
+        "refId": "A"
       }],
       "options": {
         "colorMode": "background",
@@ -86,9 +91,9 @@
       "gridPos": {"h": 8, "w": 12, "x": 0, "y": 8},
       "targets": [{
         "datasource": {"type": "influxdb", "uid": "P951FEA4DE68E13C5"},
-        "measurement": "test_run",
-        "refId": "A",
-        "select": [[{"type": "field", "params": ["total"]}]]
+        "rawQuery": true,
+        "query": "SELECT total FROM test_run",
+        "refId": "A"
       }],
       "fieldConfig": {
         "defaults": {
@@ -104,9 +109,9 @@
       "gridPos": {"h": 8, "w": 12, "x": 12, "y": 8},
       "targets": [{
         "datasource": {"type": "influxdb", "uid": "P951FEA4DE68E13C5"},
-        "measurement": "test_run",
-        "refId": "A",
-        "select": [[{"type": "field", "params": ["total"]}, {"type": "last"}]]
+        "rawQuery": true,
+        "query": "SELECT last(total) FROM test_run",
+        "refId": "A"
       }],
       "options": {
         "colorMode": "background",
@@ -114,15 +119,13 @@
         "textMode": "auto",
         "thresholds": {
           "mode": "absolute",
-          "steps": [{"color": "blue", "value": null}]
+          "steps": [
+            {"color": "blue", "value": null},
+            {"color": "blue", "value": 0}
+          ]
         }
       }
     }
   ],
-  "refresh": "10s",
-  "time": {"from": "now-7d", "to": "now"},
-  "timezone": "browser",
-  "schemaVersion": 16,
-  "version": 1,
-  "uid": "test-dashboard"
+  "schemaVersion": 16
 }
