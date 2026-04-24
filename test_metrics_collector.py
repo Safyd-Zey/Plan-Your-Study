@@ -5,7 +5,7 @@ Test Metrics Collector - Sends test results to InfluxDB for Grafana visualizatio
 import json
 import sys
 import subprocess
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 import xml.etree.ElementTree as ET
 
@@ -17,10 +17,13 @@ except ImportError:
 
 
 class TestMetricsCollector:
-    def __init__(self, influxdb_url="http://localhost:8086", db="testmetrics"):
+    def __init__(self, influxdb_url="http://localhost:8086", db="testmetrics", 
+                 username="admin", password="admin123"):
         self.influxdb_url = influxdb_url
         self.db = db
-        self.write_url = f"{influxdb_url}/write?db={db}"
+        self.username = username
+        self.password = password
+        self.write_url = f"{influxdb_url}/write?db={db}&u={username}&p={password}"
     
     def run_tests(self, test_dir="tests/"):
         """Run pytest and collect metrics"""
@@ -71,7 +74,7 @@ class TestMetricsCollector:
     def send_to_influxdb(self, metric_name, fields, tags={}, timestamp=None):
         """Send metric to InfluxDB"""
         if timestamp is None:
-            timestamp = int(datetime.utcnow().timestamp() * 1000000000)
+            timestamp = int(datetime.now(timezone.utc).timestamp() * 1000000000)
         
         # Format: measurement[,tag1=value1] field1=value1 timestamp
         tag_str = ",".join([f"{k}={v}" for k, v in tags.items()])

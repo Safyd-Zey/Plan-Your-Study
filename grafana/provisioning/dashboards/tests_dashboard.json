@@ -1,6 +1,5 @@
 {
-  "dashboard": {
-    "title": "Plan Your Study - Test Dashboard 📊",
+  "title": "Plan Your Study - Test Dashboard 📊",
     "tags": ["tests", "qa", "plan-your-study"],
     "timezone": "browser",
     "panels": [
@@ -247,7 +246,6 @@
     "time": {
       "from": "now-7d",
       "to": "now"
-    }
-  },
+    },
   "overwrite": true
 }

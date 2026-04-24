@@ -52,7 +52,7 @@ services:
 
   # InfluxDB for storing test metrics
   influxdb:
-    image: influxdb:2.7-alpine
+    image: influxdb:1.8-alpine
     container_name: plan-study-influxdb
     environment:
       INFLUXDB_DB: testmetrics
@@ -62,7 +62,7 @@ services:
     ports:
       - "8086:8086"
     volumes:
-      - influxdb_data:/var/lib/influxdb2
+      - influxdb_data:/var/lib/influxdb
     networks:
       - study-network
 
