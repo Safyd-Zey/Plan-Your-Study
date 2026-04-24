@@ -39,22 +39,16 @@ jobs:
         # Устанавливаем все зависимости + pydantic[email] для email validation
         pip install -r backend/requirements.txt
         pip install "pydantic[email]"
-        pip install pytest pytest-cov allure-pytest
+        pip install pytest pytest-cov
 
     # Устанавливаем рабочую директорию в backend, чтобы pytest видел package
-    - name: Run tests with coverage and Allure reporting
+    - name: Run tests with coverage
       working-directory: ./backend
       run: |
-        pytest ../tests/ -v --cov=. --cov-report=xml --cov-report=html --cov-report=term --cov-fail-under=80 --alluredir=../allure-results
+        pytest ../tests/ -v --cov=. --cov-report=xml --cov-report=html --cov-report=term --cov-fail-under=80
         # --cov-fail-under=80 will fail if coverage < 80%
 
-    - name: Generate Allure Report
-      if: always()
-      run: |
-        npm install -g allure-commandline --save-dev
-        allure generate allure-results -o allure-report --clean
-
-    - name: Move coverage and test reports to root
+    - name: Move coverage reports to root
       if: always()
       run: |
         mv backend/coverage.xml . 2>/dev/null || true
@@ -69,17 +63,6 @@ jobs:
         fail_ci_if_error: false
       env:
         CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
-
-    - name: Upload test reports as artifacts
-      if: always()
-      uses: actions/upload-artifact@v4
-      with:
-        name: test-reports-python-${{ matrix.python-version }}
-        path: |
-          allure-report/
-          htmlcov/
-          coverage.xml
-        retention-days: 30
 
   frontend-e2e-tests:
     name: Frontend E2E Playwright Tests
@@ -115,14 +98,6 @@ jobs:
         working-directory: ./frontend
         run: |
           npx playwright test --config=playwright.config.ts
-
-      - name: Upload Playwright reports as artifacts
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: playwright-report
-          path: frontend/playwright-report/
-          retention-days: 30
 
   code-health:
     name: Code Quality
