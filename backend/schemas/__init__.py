@@ -1,7 +1,7 @@
 from pydantic import BaseModel, EmailStr
 from typing import Optional, List
 from datetime import datetime
-from backend.models import PriorityLevel, TaskStatus
+from backend.models import PriorityLevel, TaskStatus, UserRole
 
 # User Schemas
 class UserBase(BaseModel):
@@ -10,6 +10,7 @@ class UserBase(BaseModel):
 
 class UserCreate(UserBase):
     password: str
+    role: UserRole = UserRole.USER
 
 class UserLogin(BaseModel):
     email: EmailStr
@@ -17,9 +18,42 @@ class UserLogin(BaseModel):
 
 class User(UserBase):
     id: int
+    role: UserRole
     created_at: datetime
     updated_at: datetime
     
+    class Config:
+        from_attributes = True
+
+# Course Schedule Schemas
+class CourseScheduleBase(BaseModel):
+    day_of_week: int  # 0=Monday, ..., 6=Sunday
+    start_time: str   # "HH:MM"
+    end_time: str     # "HH:MM"
+    room: Optional[str] = None
+
+class CourseScheduleCreate(CourseScheduleBase):
+    pass
+
+class CourseSchedule(CourseScheduleBase):
+    id: int
+    course_id: int
+
+    class Config:
+        from_attributes = True
+
+class CourseScheduleWithCourse(CourseSchedule):
+    course_name: str
+
+class CourseMemberCreate(BaseModel):
+    user_id: int
+
+class CourseMember(BaseModel):
+    id: int
+    course_id: int
+    user_id: int
+    created_at: datetime
+
     class Config:
         from_attributes = True
 
@@ -40,6 +74,7 @@ class Course(CourseBase):
     user_id: int
     created_at: datetime
     updated_at: datetime
+    schedules: List[CourseSchedule] = []
     
     class Config:
         from_attributes = True
@@ -106,6 +141,11 @@ class Assignment(AssignmentBase):
 
 class AssignmentWithCourse(Assignment):
     course: Course
+    user: User
+
+class AssignmentBroadcastResult(BaseModel):
+    created_count: int
+    assignment_ids: List[int]
 
 # Study Session Schemas
 class StudySessionBase(BaseModel):
@@ -148,3 +188,21 @@ class ProgressStats(BaseModel):
     not_started_assignments: int
     completion_percentage: float
     upcoming_deadlines: List[Assignment]
+
+
+# Notification Schemas
+class Notification(BaseModel):
+    id: int
+    title: str
+    message: str
+    type: str
+    is_read: bool
+    scheduled_for: Optional[datetime] = None
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+
+class NotificationMarkReadRequest(BaseModel):
+    ids: List[int]

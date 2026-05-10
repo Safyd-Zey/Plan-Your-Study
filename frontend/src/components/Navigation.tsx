@@ -9,8 +9,8 @@ export default function Navigation() {
   const location = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
 
-  const handleLogout = () => {
-    logout();
+  const handleLogout = async () => {
+    await logout();
     navigate('/login');
   };
 
@@ -53,7 +53,20 @@ export default function Navigation() {
 
           {/* User Menu */}
           <div className="flex items-center gap-4">
-            <span className="text-sm text-gray-700 hidden sm:inline">{user?.username}</span>
+            <div className="hidden sm:flex items-center gap-2">
+              <span className="text-sm text-gray-700">{user?.username}</span>
+              {user?.role && (
+                <span
+                  className={`px-2 py-0.5 rounded-full text-xs font-semibold ${
+                    user.role === 'admin'
+                      ? 'bg-orange-100 text-orange-700'
+                      : 'bg-slate-100 text-slate-700'
+                  }`}
+                >
+                  {user.role.toUpperCase()}
+                </span>
+              )}
+            </div>
             <button
               onClick={handleLogout}
               className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-red-600 hover:bg-red-50 rounded-md transition"

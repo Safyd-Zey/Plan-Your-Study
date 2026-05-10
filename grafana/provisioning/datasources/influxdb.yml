@@ -7,6 +7,11 @@ datasources:
     url: http://influxdb:8086
     isDefault: true
     editable: true
+    uid: P951FEA4DE68E13C5
+    database: testmetrics
+    user: admin
+    secureJsonData:
+      password: admin123
     jsonData:
       database: testmetrics
       httpMode: GET

@@ -14,24 +14,42 @@ import ProgressPage from '@/pages/ProgressPage';
 
 // Components
 import Navigation from '@/components/Navigation';
+import NotificationToasts from '@/components/NotificationToasts';
+import NotificationWatcher from '@/components/NotificationWatcher';
 
 function ProtectedRoute({ element }: { element: React.ReactNode }) {
-  const { token } = useAuthStore();
-  return token ? element : <Navigate to="/login" />;
+  const { user, authChecked } = useAuthStore();
+  if (!authChecked) return null;
+  return user ? element : <Navigate to="/login" />;
 }
 
 function PublicRoute({ element }: { element: React.ReactNode }) {
-  const { token } = useAuthStore();
-  return !token ? element : <Navigate to="/dashboard" />;
+  const { user, authChecked } = useAuthStore();
+  if (!authChecked) return null;
+  return !user ? element : <Navigate to="/dashboard" />;
 }
 
 export default function App() {
-  const { token } = useAuthStore();
+  const { user, authChecked, initializeAuth } = useAuthStore();
+
+  React.useEffect(() => {
+    initializeAuth();
+  }, [initializeAuth]);
+
+  if (!authChecked) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-gray-600">Loading...</div>
+      </div>
+    );
+  }
 
   return (
     <BrowserRouter>
       <div className="min-h-screen bg-gray-50">
-        {token && <Navigation />}
+        {user && <Navigation />}
+        {user && <NotificationWatcher />}
+        <NotificationToasts />
         <Routes>
           {/* Public Routes */}
           <Route path="/login" element={<PublicRoute element={<LoginPage />} />} />
@@ -45,7 +63,7 @@ export default function App() {
           <Route path="/progress" element={<ProtectedRoute element={<ProgressPage />} />} />
 
           {/* Fallback */}
-          <Route path="/" element={<Navigate to={token ? "/dashboard" : "/login"} />} />
+          <Route path="/" element={<Navigate to={user ? "/dashboard" : "/login"} />} />
         </Routes>
       </div>
     </BrowserRouter>

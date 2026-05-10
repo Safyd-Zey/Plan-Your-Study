@@ -1,11 +1,31 @@
-import React, { useState, useEffect } from 'react';
-import { useDataStore } from '@/store';
+import React, { useState, useEffect, useMemo } from 'react';
+import { useDataStore, type Assignment } from '@/store';
+import { useAuthStore } from '@/store';
 import { Plus, Trash2, Edit2, ChevronDown } from 'lucide-react';
 import { format } from 'date-fns';
+import { useSearchParams } from 'react-router-dom';
+
+interface AdminAssignmentGroup {
+  key: string;
+  title: string;
+  description?: string;
+  deadline: string;
+  priority: 'low' | 'medium' | 'high';
+  course_id: number;
+  members: Assignment[];
+  completedCount: number;
+  inProgressCount: number;
+  notStartedCount: number;
+}
 
 export default function AssignmentsPage() {
+    const { user } = useAuthStore();
+    const isAdmin = user?.role === 'admin';
+  const [searchParams] = useSearchParams();
+
   const [showForm, setShowForm] = useState(false);
   const [expandedAssignmentId, setExpandedAssignmentId] = useState<number | null>(null);
+  const [expandedGroupKey, setExpandedGroupKey] = useState<string | null>(null);
   const [newSubtaskTitle, setNewSubtaskTitle] = useState<Record<number, string>>({});
   const [editingId, setEditingId] = useState<number | null>(null);
   const [formData, setFormData] = useState({
@@ -35,6 +55,56 @@ export default function AssignmentsPage() {
     isLoading,
   } = useDataStore();
 
+  const toLocalDateTimePayload = (value: string) => {
+    if (!value) return value;
+    return value.length === 16 ? `${value}:00` : value;
+  };
+
+  const getAdminGroupKey = (assignment: Assignment) => (
+    [
+      assignment.course_id,
+      assignment.title,
+      assignment.description || '',
+      assignment.deadline,
+      assignment.priority,
+    ].join('::')
+  );
+
+  const adminGroupedAssignments = useMemo<AdminAssignmentGroup[]>(() => {
+    if (!isAdmin) return [];
+
+    const groups = new Map<string, AdminAssignmentGroup>();
+    assignments.forEach((assignment) => {
+      const key = getAdminGroupKey(assignment);
+      const existing = groups.get(key);
+
+      if (!existing) {
+        groups.set(key, {
+          key,
+          title: assignment.title,
+          description: assignment.description,
+          deadline: assignment.deadline,
+          priority: assignment.priority,
+          course_id: assignment.course_id,
+          members: [assignment],
+          completedCount: assignment.status === 'completed' ? 1 : 0,
+          inProgressCount: assignment.status === 'in_progress' ? 1 : 0,
+          notStartedCount: assignment.status === 'not_started' ? 1 : 0,
+        });
+        return;
+      }
+
+      existing.members.push(assignment);
+      if (assignment.status === 'completed') existing.completedCount += 1;
+      if (assignment.status === 'in_progress') existing.inProgressCount += 1;
+      if (assignment.status === 'not_started') existing.notStartedCount += 1;
+    });
+
+    return Array.from(groups.values()).sort(
+      (a, b) => new Date(b.deadline).getTime() - new Date(a.deadline).getTime()
+    );
+  }, [assignments, isAdmin]);
+
   useEffect(() => {
     fetchCourses();
     fetchAssignments();
@@ -42,13 +112,36 @@ export default function AssignmentsPage() {
     fetchOverdueAssignments();
   }, []);
 
+  useEffect(() => {
+    const assignmentId = Number(searchParams.get('assignmentId'));
+    if (!assignmentId || !assignments.length) return;
+
+    const target = assignments.find((a) => a.id === assignmentId);
+    if (!target) return;
+
+    if (isAdmin) {
+      setExpandedGroupKey(getAdminGroupKey(target));
+    } else {
+      setExpandedAssignmentId(assignmentId);
+    }
+
+    window.setTimeout(() => {
+      document.getElementById(`assignment-${assignmentId}`)?.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start',
+      });
+    }, 50);
+  }, [assignments, searchParams, isAdmin]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
+      const deadlinePayload = toLocalDateTimePayload(formData.deadline);
+
       if (editingId) {
         await updateAssignment(editingId, {
           ...formData,
-          deadline: new Date(formData.deadline).toISOString(),
+          deadline: deadlinePayload,
         });
         setEditingId(null);
       } else {
@@ -59,7 +152,7 @@ export default function AssignmentsPage() {
         await addAssignment({
           ...formData,
           status: 'not_started',
-          deadline: new Date(formData.deadline).toISOString(),
+          deadline: deadlinePayload,
         });
       }
       setFormData({
@@ -119,6 +212,19 @@ export default function AssignmentsPage() {
     return courses.find((c) => c.id === courseId)?.name || 'Unknown Course';
   };
 
+  const now = new Date();
+  const upcomingCount = isAdmin
+    ? adminGroupedAssignments.filter(
+        (g) => new Date(g.deadline) > now && g.completedCount < g.members.length
+      ).length
+    : upcomingAssignments.length;
+  const overdueCount = isAdmin
+    ? adminGroupedAssignments.filter(
+        (g) => new Date(g.deadline) <= now && g.completedCount < g.members.length
+      ).length
+    : overdueAssignments.length;
+  const totalCount = isAdmin ? adminGroupedAssignments.length : assignments.length;
+
   return (
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -138,15 +244,15 @@ export default function AssignmentsPage() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
           <div className="bg-white p-4 rounded-lg shadow">
             <p className="text-lg font-semibold text-gray-800">Upcoming</p>
-            <p className="text-3xl font-bold text-blue-600">{upcomingAssignments.length}</p>
+            <p className="text-3xl font-bold text-blue-600">{upcomingCount}</p>
           </div>
           <div className="bg-white p-4 rounded-lg shadow">
             <p className="text-lg font-semibold text-gray-800">Overdue</p>
-            <p className="text-3xl font-bold text-red-600">{overdueAssignments.length}</p>
+            <p className="text-3xl font-bold text-red-600">{overdueCount}</p>
           </div>
           <div className="bg-white p-4 rounded-lg shadow">
             <p className="text-lg font-semibold text-gray-800">Total</p>
-            <p className="text-3xl font-bold text-gray-800">{assignments.length}</p>
+            <p className="text-3xl font-bold text-gray-800">{totalCount}</p>
           </div>
         </div>
 
@@ -270,10 +376,99 @@ export default function AssignmentsPage() {
           </div>
         ) : (
           <div className="space-y-4">
-            {assignments
-              .sort((a, b) => new Date(b.deadline).getTime() - new Date(a.deadline).getTime())
-              .map((assignment) => (
-                <div key={assignment.id} className="bg-white rounded-lg shadow overflow-hidden">
+            {isAdmin
+              ? adminGroupedAssignments.map((group) => {
+                  const isExpanded = expandedGroupKey === group.key;
+                  const idForAnchor = group.members[0]?.id;
+                  const aggregateStatus =
+                    group.completedCount === group.members.length
+                      ? 'completed'
+                      : group.inProgressCount > 0
+                      ? 'in_progress'
+                      : 'not_started';
+
+                  return (
+                    <div id={idForAnchor ? `assignment-${idForAnchor}` : undefined} key={group.key} className="bg-white rounded-lg shadow overflow-hidden">
+                      <div
+                        className="p-6 cursor-pointer hover:bg-gray-50 transition flex items-center justify-between"
+                        onClick={() => setExpandedGroupKey(isExpanded ? null : group.key)}
+                      >
+                        <div className="flex-1">
+                          <div className="flex items-center gap-3 mb-2">
+                            <h3 className="text-lg font-semibold text-gray-900">{group.title}</h3>
+                            <span className={`px-3 py-1 rounded-full text-xs font-medium ${priorityColors[group.priority]}`}>
+                              {group.priority}
+                            </span>
+                            <span className={`px-3 py-1 rounded-full text-xs font-medium ${statusBadgeColors[aggregateStatus]}`}>
+                              {group.completedCount}/{group.members.length} completed
+                            </span>
+                          </div>
+                          <p className="text-sm text-gray-600">
+                            📚 {getCourseNameById(group.course_id)} • 📅 {format(new Date(group.deadline), 'MMM d, yyyy HH:mm')}
+                          </p>
+                          <p className="text-xs text-indigo-700 mt-1">
+                            👥 Students: {group.members.length}
+                          </p>
+                        </div>
+                        <ChevronDown
+                          size={24}
+                          className={`text-gray-400 transition ${isExpanded ? 'rotate-180' : ''}`}
+                        />
+                      </div>
+
+                      {isExpanded && (
+                        <div className="border-t border-gray-200 p-6 bg-gray-50">
+                          {group.description && <p className="text-gray-700 mb-4">{group.description}</p>}
+
+                          <div className="space-y-2">
+                            {group.members
+                              .slice()
+                              .sort((a, b) => (a.user?.username || '').localeCompare(b.user?.username || ''))
+                              .map((memberAssignment) => (
+                                <div key={memberAssignment.id} className="bg-white border border-gray-200 rounded-lg px-3 py-3 flex items-center justify-between gap-3">
+                                  <div>
+                                    <p className="text-sm font-medium text-gray-900">
+                                      👤 {memberAssignment.user?.username || 'Unknown student'}
+                                    </p>
+                                    <p className="text-xs text-gray-500 mt-0.5">
+                                      Status: {memberAssignment.status.replace('_', ' ')}
+                                    </p>
+                                  </div>
+
+                                  <div className="flex items-center gap-2">
+                                    {memberAssignment.status !== 'completed' ? (
+                                      <button
+                                        onClick={() =>
+                                          handleAssignmentStatusChange(
+                                            memberAssignment.id,
+                                            memberAssignment.status === 'not_started' ? 'in_progress' : 'completed'
+                                          )
+                                        }
+                                        className="px-3 py-1 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg"
+                                      >
+                                        {memberAssignment.status === 'not_started' ? 'Start' : 'Mark Completed'}
+                                      </button>
+                                    ) : (
+                                      <button
+                                        onClick={() => handleAssignmentStatusChange(memberAssignment.id, 'not_started')}
+                                        className="px-3 py-1 text-sm font-medium text-white bg-yellow-500 hover:bg-yellow-600 rounded-lg"
+                                      >
+                                        Reopen
+                                      </button>
+                                    )}
+                                  </div>
+                                </div>
+                              ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })
+              : assignments
+                  .sort((a, b) => new Date(b.deadline).getTime() - new Date(a.deadline).getTime())
+                  .map((assignment) => (
+                <div id={`assignment-${assignment.id}`} key={assignment.id} className="bg-white rounded-lg shadow overflow-hidden">
                   <div
                     className="p-6 cursor-pointer hover:bg-gray-50 transition flex items-center justify-between"
                     onClick={() =>
@@ -293,8 +488,13 @@ export default function AssignmentsPage() {
                         </span>
                       </div>
                       <p className="text-sm text-gray-600">
-                        📚 {getCourseNameById(assignment.course_id)} • 📅 {format(new Date(assignment.deadline), 'MMM d, yyyy h:mm a')}
+                        📚 {getCourseNameById(assignment.course_id)} • 📅 {format(new Date(assignment.deadline), 'MMM d, yyyy HH:mm')}
                       </p>
+                      {isAdmin && assignment.user && (
+                        <p className="text-xs text-indigo-700 mt-1">
+                          👤 Student: {assignment.user.username}
+                        </p>
+                      )}
                     </div>
                     <ChevronDown
                       size={24}

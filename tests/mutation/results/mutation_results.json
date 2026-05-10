@@ -1,0 +1,102 @@
+[
+  {
+    "id": 1,
+    "module": "backend/routers/auth.py",
+    "description": "verify_password: return False instead of True for valid match",
+    "mutation_type": "Return value modification",
+    "original_code": "    return pwd_context.verify(plain_password, hashed_password)",
+    "mutated_code": "    return not pwd_context.verify(plain_password, hashed_password)",
+    "status": "killed",
+    "test_output": " Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).\n    expire = datetime.utcnow() + expires_delta\n\n-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html\n=========================== short test summary info ============================\nFAILED tests/integration/test_api_auth.py::test_user_login_success - assert 4...\n!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!\n1 failed, 7 passed, 16 warnings in 1.71s\n"
+  },
+  {
+    "id": 2,
+    "module": "backend/routers/auth.py",
+    "description": "create_access_token: use subtraction instead of addition for expire",
+    "mutation_type": "Arithmetic change",
+    "original_code": "        expire = datetime.utcnow() + expires_delta",
+    "mutated_code": "        expire = datetime.utcnow() - expires_delta",
+    "status": "killed",
+    "test_output": "ion. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).\n    expire = datetime.utcnow() - expires_delta\n\n-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html\n=========================== short test summary info ============================\nFAILED tests/integration/test_api_auth.py::test_create_course_authenticated\n!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!\n1 failed, 10 passed, 24 warnings in 2.53s\n"
+  },
+  {
+    "id": 3,
+    "module": "backend/routers/auth.py",
+    "description": "get_current_user: skip email None check (always proceed)",
+    "mutation_type": "Condition removal",
+    "original_code": "        if email is None:\n            raise credentials_exception",
+    "mutated_code": "        if False:\n            raise credentials_exception",
+    "status": "survived",
+    "test_output": "e_calendar_endpoint\n  /home/safyd/Documents/AITU/Plan Your Study/backend/routers/schedule.py:118: PydanticDeprecatedSince20: The `dict` method is deprecated; use `model_dump` instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.13/migration/\n    \"study_sessions\": [StudySessionSchema.from_orm(s).dict() for s in sessions]\n\n-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html\n22 passed, 159 warnings in 7.18s\n"
+  },
+  {
+    "id": 4,
+    "module": "backend/routers/auth.py",
+    "description": "register: change duplicate check operator == to !=",
+    "mutation_type": "Logical operator change",
+    "original_code": "    existing_user = db.query(User).filter(\n        (User.email == user_data.email) | (User.username == user_data.username)\n    ).first()",
+    "mutated_code": "    existing_user = db.query(User).filter(\n        (User.email != user_data.email) | (User.username != user_data.username)\n    ).first()",
+    "status": "killed",
+    "test_output": "d/Documents/AITU/Plan Your Study/tests/conftest.py:62: SAWarning: transaction already deassociated from connection\n    transaction.rollback()\n\n-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html\n=========================== short test summary info ============================\nFAILED tests/integration/test_api_auth.py::test_user_registration_duplicate_email\n!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!\n1 failed, 6 passed, 16 warnings in 1.51s\n"
+  },
+  {
+    "id": 5,
+    "module": "backend/routers/auth.py",
+    "description": "get_current_user: change email payload key 'sub' to 'usr'",
+    "mutation_type": "Constant alteration",
+    "original_code": "        email: str = payload.get(\"sub\")",
+    "mutated_code": "        email: str = payload.get(\"usr\")",
+    "status": "killed",
+    "test_output": "ion. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).\n    expire = datetime.utcnow() + expires_delta\n\n-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html\n=========================== short test summary info ============================\nFAILED tests/integration/test_api_auth.py::test_create_course_authenticated\n!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!\n1 failed, 10 passed, 24 warnings in 2.56s\n"
+  },
+  {
+    "id": 6,
+    "module": "backend/routers/courses.py",
+    "description": "create_course: return 200 instead of 201 status code",
+    "mutation_type": "Constant alteration",
+    "original_code": "@router.post(\"/\", response_model=CourseSchema, status_code=status.HTTP_201_CREATED)",
+    "mutated_code": "@router.post(\"/\", response_model=CourseSchema, status_code=status.HTTP_200_OK)",
+    "status": "killed",
+    "test_output": "recated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.13/migration/\n    **course.dict()\n\n-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html\n=========================== short test summary info ============================\nFAILED tests/integration/test_api_auth.py::test_create_course_authenticated\n!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!\n1 failed, 10 passed, 27 warnings in 2.62s\n"
+  },
+  {
+    "id": 7,
+    "module": "backend/routers/courses.py",
+    "description": "get_course: change == to != in user ownership filter",
+    "mutation_type": "Logical operator change",
+    "original_code": "        (Course.id == course_id) & (Course.user_id == current_user.id)",
+    "mutated_code": "        (Course.id == course_id) & (Course.user_id != current_user.id)",
+    "status": "killed",
+    "test_output": " be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.13/migration/\n    **course.dict()\n\n-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html\n=========================== short test summary info ============================\nFAILED tests/integration/test_api_course_assignment_subtask_progress.py::test_course_update_get_delete\n!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!\n1 failed, 16 passed, 56 warnings in 4.84s\n"
+  },
+  {
+    "id": 8,
+    "module": "backend/routers/courses.py",
+    "description": "get_courses: remove user_id filter (return all users' courses)",
+    "mutation_type": "Condition removal",
+    "original_code": "    courses = db.query(Course).filter(Course.user_id == current_user.id).all()",
+    "mutated_code": "    courses = db.query(Course).all()",
+    "status": "killed",
+    "test_output": "ed in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.13/migration/\n    **course.dict()\n\n-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html\n=========================== short test summary info ============================\nFAILED tests/integration/test_api_auth.py::test_list_courses_isolation - Asse...\n!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!\n1 failed, 13 passed, 45 warnings in 3.86s\n"
+  },
+  {
+    "id": 9,
+    "module": "backend/routers/assignments.py",
+    "description": "get_assignment: change == to != in ownership filter",
+    "mutation_type": "Logical operator change",
+    "original_code": "        (Assignment.id == assignment_id) & (Assignment.user_id == current_user.id)",
+    "mutated_code": "        (Assignment.id == assignment_id) & (Assignment.user_id != current_user.id)",
+    "status": "killed",
+    "test_output": "in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.13/migration/\n    **assignment.dict()\n\n-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html\n=========================== short test summary info ============================\nFAILED tests/integration/test_api_course_assignment_subtask_progress.py::test_assignment_lifecycle_and_filters\n!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!\n1 failed, 17 passed, 73 warnings in 5.14s\n"
+  },
+  {
+    "id": 10,
+    "module": "backend/routers/assignments.py",
+    "description": "create_assignment: assign wrong user_id (0 instead of current_user.id)",
+    "mutation_type": "Constant alteration",
+    "original_code": "        user_id=current_user.id,",
+    "mutated_code": "        user_id=0,",
+    "status": "killed",
+    "test_output": "in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.13/migration/\n    **assignment.dict()\n\n-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html\n=========================== short test summary info ============================\nFAILED tests/integration/test_api_course_assignment_subtask_progress.py::test_assignment_lifecycle_and_filters\n!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!\n1 failed, 17 passed, 73 warnings in 5.20s\n"
+  }
+]

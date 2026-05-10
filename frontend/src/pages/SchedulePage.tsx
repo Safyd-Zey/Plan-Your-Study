@@ -1,15 +1,18 @@
 import React, { useEffect, useState } from 'react';
 import apiClient from '@/api';
-import { format, startOfWeek, addDays } from 'date-fns';
+import { format, startOfWeek, addDays, parse } from 'date-fns';
 import { Calendar, Clock } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 interface ScheduleDay {
   date: string;
   assignments: any[];
   study_sessions: any[];
+  course_sessions: any[];
 }
 
 export default function SchedulePage() {
+  const navigate = useNavigate();
   const [schedule, setSchedule] = useState<ScheduleDay[]>([]);
   const [calendarData, setCalendarData] = useState<any[]>([]);
   const [calendarMonth, setCalendarMonth] = useState(() => new Date().toISOString().slice(0, 7));
@@ -36,6 +39,7 @@ export default function SchedulePage() {
           date: format(date, 'yyyy-MM-dd'),
           assignments: [],
           study_sessions: [],
+          course_sessions: [],
         });
       }
 
@@ -50,6 +54,11 @@ export default function SchedulePage() {
         const dateStr = new Date(s.start_time).toISOString().split('T')[0];
         const day = days.find((d) => d.date === dateStr);
         if (day) day.study_sessions.push(s);
+      });
+
+      (response.data.course_sessions || []).forEach((cs: any) => {
+        const day = days.find((d) => d.date === cs.date);
+        if (day) day.course_sessions.push(cs);
       });
 
       setSchedule(days);
@@ -101,6 +110,10 @@ export default function SchedulePage() {
     high: 'border-l-4 border-red-600 bg-red-50',
     medium: 'border-l-4 border-yellow-600 bg-yellow-50',
     low: 'border-l-4 border-green-600 bg-green-50',
+  };
+
+  const openAssignmentDetails = (assignmentId: number) => {
+    navigate(`/assignments?assignmentId=${assignmentId}`);
   };
 
   return (
@@ -245,12 +258,16 @@ export default function SchedulePage() {
                   {/* Assignments */}
                   <div className="space-y-2 mb-4">
                     {day.assignments.map((assignment) => (
-                      <div key={assignment.id} className={`p-3 rounded-lg text-sm ${priorityColors[assignment.priority as 'low' | 'medium' | 'high']}`}>
+                      <button
+                        key={assignment.id}
+                        onClick={() => openAssignmentDetails(assignment.id)}
+                        className={`w-full text-left p-3 rounded-lg text-sm ${priorityColors[assignment.priority as 'low' | 'medium' | 'high']} hover:opacity-90 transition`}
+                      >
                         <p className="font-medium text-gray-900">{assignment.title}</p>
                         <p className="text-xs text-gray-600 mt-1">
-                          {format(new Date(assignment.deadline), 'h:mm a')}
+                          {format(new Date(assignment.deadline), 'HH:mm')}
                         </p>
-                      </div>
+                      </button>
                     ))}
                   </div>
 
@@ -262,14 +279,27 @@ export default function SchedulePage() {
                           <Clock size={14} /> {session.title}
                         </p>
                         <p className="text-xs text-gray-600 mt-1">
-                          {format(new Date(session.start_time), 'h:mm a')} -{' '}
-                          {format(new Date(session.end_time), 'h:mm a')}
+                          {format(new Date(session.start_time), 'HH:mm')} -{' '}
+                          {format(new Date(session.end_time), 'HH:mm')}
                         </p>
                       </div>
                     ))}
                   </div>
 
-                  {day.assignments.length === 0 && day.study_sessions.length === 0 && (
+                  {/* Course Schedule Slots */}
+                  <div className="space-y-2 mt-2">
+                    {day.course_sessions.map((cs: any) => (
+                      <div key={`cs-${cs.id}-${cs.date}`} className="p-3 bg-teal-50 border-l-4 border-teal-600 rounded-lg text-sm">
+                        <p className="font-medium text-teal-900">📚 {cs.course_name}</p>
+                        <p className="text-xs text-gray-600 mt-1">
+                          {format(parse(cs.start_time, 'HH:mm', new Date()), 'HH:mm')} – {format(parse(cs.end_time, 'HH:mm', new Date()), 'HH:mm')}
+                          {cs.room && ` · ${cs.room}`}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+
+                  {day.assignments.length === 0 && day.study_sessions.length === 0 && day.course_sessions.length === 0 && (
                     <p className="text-gray-500 text-center text-sm py-8">No events</p>
                   )}
                 </div>
@@ -296,10 +326,14 @@ export default function SchedulePage() {
 
                   <div className="space-y-2 mb-3">
                     {day.assignments.map((assignment: any) => (
-                      <div key={assignment.id} className={`p-2 rounded-lg text-sm ${priorityColors[assignment.priority as 'low' | 'medium' | 'high']}`}>
+                      <button
+                        key={assignment.id}
+                        onClick={() => openAssignmentDetails(assignment.id)}
+                        className={`w-full text-left p-2 rounded-lg text-sm ${priorityColors[assignment.priority as 'low' | 'medium' | 'high']} hover:opacity-90 transition`}
+                      >
                         <p className="font-medium text-gray-900">{assignment.title}</p>
-                        <p className="text-xs text-gray-600">{format(new Date(assignment.deadline), 'h:mm a')}</p>
-                      </div>
+                        <p className="text-xs text-gray-600">{format(new Date(assignment.deadline), 'HH:mm')}</p>
+                      </button>
                     ))}
                   </div>
 
@@ -307,12 +341,21 @@ export default function SchedulePage() {
                     {day.study_sessions.map((session: any) => (
                       <div key={session.id} className="p-2 bg-purple-50 border-l-4 border-purple-600 rounded-lg text-sm">
                         <p className="font-medium text-gray-900">{session.title}</p>
-                        <p className="text-xs text-gray-600">{format(new Date(session.start_time), 'h:mm a')}</p>
+                        <p className="text-xs text-gray-600">{format(new Date(session.start_time), 'HH:mm')}</p>
                       </div>
                     ))}
                   </div>
 
-                  {day.assignments.length === 0 && day.study_sessions.length === 0 && (
+                  <div className="space-y-2 mt-1">
+                    {(day.course_sessions || []).map((cs: any) => (
+                      <div key={`cs-${cs.id}-${cs.date}`} className="p-2 bg-teal-50 border-l-4 border-teal-600 rounded-lg text-sm">
+                        <p className="font-medium text-teal-900">📚 {cs.course_name}</p>
+                        <p className="text-xs text-gray-600">{cs.start_time} – {cs.end_time}{cs.room && ` · ${cs.room}`}</p>
+                      </div>
+                    ))}
+                  </div>
+
+                  {day.assignments.length === 0 && day.study_sessions.length === 0 && (day.course_sessions || []).length === 0 && (
                     <p className="text-gray-500 text-center text-sm py-8">No events</p>
                   )}
                 </div>

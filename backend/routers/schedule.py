@@ -1,13 +1,42 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from backend.database import get_db
-from backend.models import Assignment, StudySession, User
+from backend.models import Assignment, StudySession, Course, CourseMember, User, UserRole
 from backend.schemas import Assignment as AssignmentSchema, StudySession as StudySessionSchema, StudySessionCreate
 from backend.routers.auth import get_current_user
 from typing import List
 from datetime import datetime, timedelta
 
 router = APIRouter()
+
+def _get_course_sessions_for_range(current_user: User, start_date, end_date, db: Session):
+    """Return list of dicts representing recurring course schedule occurrences in [start_date, end_date)."""
+    if current_user.role == UserRole.ADMIN:
+        courses = db.query(Course).filter(Course.user_id == current_user.id).all()
+    else:
+        courses = db.query(Course).join(CourseMember, CourseMember.course_id == Course.id).filter(
+            CourseMember.user_id == current_user.id
+        ).all()
+
+    sessions = []
+    for course in courses:
+        for slot in course.schedules:
+            # Walk each day in range and emit an occurrence on matching weekday
+            day = start_date
+            while day < end_date:
+                if day.weekday() == slot.day_of_week:
+                    sessions.append({
+                        "id": slot.id,
+                        "course_id": course.id,
+                        "course_name": course.name,
+                        "day_of_week": slot.day_of_week,
+                        "start_time": slot.start_time,
+                        "end_time": slot.end_time,
+                        "room": slot.room,
+                        "date": day.isoformat(),
+                    })
+                day += timedelta(days=1)
+    return sessions
 
 @router.get("/daily", response_model=dict)
 def get_daily_schedule(date: str = None, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
@@ -29,11 +58,14 @@ def get_daily_schedule(date: str = None, current_user: User = Depends(get_curren
         (StudySession.user_id == current_user.id) &
         (StudySession.start_time.cast(db.Date) == target_date)
     ).all()
-    
+
+    course_sessions = _get_course_sessions_for_range(current_user, target_date, target_date + timedelta(days=1), db)
+
     return {
         "date": target_date.isoformat(),
         "assignments": [AssignmentSchema.from_orm(a).dict() for a in assignments],
-        "study_sessions": [StudySessionSchema.from_orm(s).dict() for s in sessions]
+        "study_sessions": [StudySessionSchema.from_orm(s).dict() for s in sessions],
+        "course_sessions": course_sessions,
     }
 
 @router.get("/weekly", response_model=dict)
@@ -59,12 +91,15 @@ def get_weekly_schedule(start_date: str = None, current_user: User = Depends(get
         (StudySession.start_time >= start) &
         (StudySession.start_time < end)
     ).all()
-    
+
+    course_sessions = _get_course_sessions_for_range(current_user, start, end, db)
+
     return {
         "start_date": start.isoformat(),
         "end_date": end.isoformat(),
         "assignments": [AssignmentSchema.from_orm(a).dict() for a in assignments],
-        "study_sessions": [StudySessionSchema.from_orm(s).dict() for s in sessions]
+        "study_sessions": [StudySessionSchema.from_orm(s).dict() for s in sessions],
+        "course_sessions": course_sessions,
     }
 
 
@@ -100,6 +135,8 @@ def get_monthly_calendar(month: str = None, current_user: User = Depends(get_cur
     ).all()
 
     # Build calendar map
+    all_course_sessions = _get_course_sessions_for_range(current_user, month_start, month_end, db)
+
     days = []
     day = month_start
     while day < month_end:
@@ -108,6 +145,7 @@ def get_monthly_calendar(month: str = None, current_user: User = Depends(get_cur
             "date": day_str,
             "assignments": [AssignmentSchema.from_orm(a).dict() for a in assignments if a.deadline.date() == day],
             "study_sessions": [StudySessionSchema.from_orm(s).dict() for s in sessions if s.start_time.date() == day],
+            "course_sessions": [cs for cs in all_course_sessions if cs["date"] == day_str],
         })
         day += timedelta(days=1)
 

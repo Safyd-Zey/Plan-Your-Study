@@ -1,0 +1,2 @@
+Method,Name,Error,Occurrences
+POST,/api/assignments [POST],HTTPError('422 Client Error: Unprocessable Entity for url: /api/assignments [POST]'),23

@@ -1,0 +1,99 @@
+[
+  {
+    "scenario": "Auth Fault \u2013 Invalid Tokens",
+    "fault_type": "Token manipulation / auth bypass attempt",
+    "affected_module": "backend/routers/auth.py",
+    "fault_duration_s": 0,
+    "availability_pct": 100.0,
+    "mttr_s": 0,
+    "error_propagation": "Contained to auth layer \u2014 no cascade to DB",
+    "graceful_degradation": true,
+    "observations": "Sent 35 requests with invalid tokens. 401: 35, 500: 0, other: 0, timeout: 0. No 500 errors \u2014 graceful rejection.",
+    "raw_data": {
+      "401": 35,
+      "500": 0,
+      "other": 0,
+      "timeout": 0
+    }
+  },
+  {
+    "scenario": "Malformed Input Flood",
+    "fault_type": "Invalid payload injection",
+    "affected_module": "backend/routers/auth.py (registration endpoint)",
+    "fault_duration_s": 0,
+    "availability_pct": 100.0,
+    "mttr_s": 0,
+    "error_propagation": "Validation layer absorbs all malformed requests",
+    "graceful_degradation": true,
+    "observations": "Sent 27 malformed requests. 4xx (expected): 26, 5xx (errors): 0, 200 (unexpected): 1, timeout: 0. All rejected gracefully.",
+    "raw_data": {
+      "4xx": 26,
+      "5xx": 0,
+      "ok": 1,
+      "timeout": 0
+    }
+  },
+  {
+    "scenario": "Auth Downtime \u2013 Unauthenticated Access",
+    "fault_type": "Missing authentication token",
+    "affected_module": "backend/routers/auth.py (get_current_user)",
+    "fault_duration_s": 0,
+    "availability_pct": 100,
+    "mttr_s": 0,
+    "error_propagation": "Authorization check prevents access \u2014 no cascade",
+    "graceful_degradation": false,
+    "observations": "Sent 20 unauthenticated requests to protected endpoints. 401: 10, 403: 0, 200 (breach!): 0, other: 10. Authorization properly enforced.",
+    "raw_data": {
+      "401": 10,
+      "403": 0,
+      "200": 0,
+      "other": 10
+    }
+  },
+  {
+    "scenario": "Resource Exhaustion",
+    "fault_type": "Concurrent load spike (200 users)",
+    "affected_module": "All API endpoints",
+    "fault_duration_s": 10.37,
+    "availability_pct": 9.5,
+    "mttr_s": 0,
+    "error_propagation": "0 failed requests, 181 timeouts",
+    "graceful_degradation": false,
+    "observations": "200 concurrent requests in 10.37s. Success: 19, Fail: 0, Timeout: 181. Availability: 9.5%.",
+    "raw_data": {
+      "ok": 19,
+      "fail": 0,
+      "timeout": 181,
+      "elapsed_s": 10.368774175643921
+    }
+  },
+  {
+    "scenario": "Database Stress",
+    "fault_type": "Rapid CRUD operations",
+    "affected_module": "backend/database.py, all routers",
+    "fault_duration_s": 0,
+    "availability_pct": 0,
+    "mttr_s": 0,
+    "error_propagation": "Could not obtain token",
+    "graceful_degradation": false,
+    "observations": "Skipped: could not register test user",
+    "raw_data": {}
+  },
+  {
+    "scenario": "API Downtime",
+    "fault_type": "Service kill",
+    "affected_module": "backend/main.py (uvicorn process)",
+    "fault_duration_s": 1.0100038051605225,
+    "availability_pct": 100.0,
+    "mttr_s": 1.01,
+    "error_propagation": "All endpoints return connection error during downtime",
+    "graceful_degradation": false,
+    "observations": "Backend killed (1 processes). 0/5 checks still up after kill. Restarted in 1.01s. Recovery: YES.",
+    "raw_data": {
+      "pids_killed": [
+        "343970"
+      ],
+      "recovered": true
+    }
+  }
+]
