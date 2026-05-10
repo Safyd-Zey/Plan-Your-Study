@@ -1,47 +1,54 @@
 # Plan Your Study - Complete System
 
-A comprehensive study planning and task management system for students, built with modern web technologies.
+Plan Your Study is a full-stack study planning application for course-based learning. It supports role-based workflows (admin and user), per-student assignment tracking, schedule management, subtasks, progress analytics, and in-app notifications.
 
-## 🎯 Project Overview
+## Project Overview
 
-"Plan Your Study" helps students efficiently manage their academic workload by providing:
-- Course organization and management
-- Task and assignment tracking
-- Deadline reminders and scheduling
-- Progress monitoring
-- Subtask breakdown for complex assignments
+The system helps students and course admins to:
+- organize courses and members,
+- manage assignments with deadlines and priorities,
+- track status and subtasks,
+- view weekly/monthly schedule context,
+- monitor completion progress,
+- receive in-app reminders.
 
-## 📋 System Architecture
+## System Architecture
 
 ### Backend
-- **Framework**: FastAPI
-- **Database**: SQLite with SQLAlchemy ORM
-- **Authentication**: JWT-based
-- **API**: RESTful with automatic documentation
+- Framework: FastAPI
+- Database: SQLite (default local runtime), SQLAlchemy ORM
+- Authentication: JWT in httpOnly cookie
+- API style: REST
 
 ### Frontend
-- **Framework**: React 18 with TypeScript
-- **State Management**: Zustand
-- **Styling**: Tailwind CSS
-- **Routing**: React Router v6
-- **Build**: Vite
+- Framework: React 18 + TypeScript
+- State: Zustand
+- Styling: Tailwind CSS
+- Routing: React Router v6
+- Build: Vite
 
-## 🚀 Quick Start
+## Quick Start (Local Development)
 
-### Backend Setup
+Run both services from two terminals.
+
+### 1) Backend
+
+From project root:
 
 ```bash
-cd backend
 python -m venv venv
 source venv/bin/activate  # Windows: venv\Scripts\activate
-pip install -r requirements.txt
-python main.py
+pip install -r backend/requirements.txt
+python -m uvicorn backend.main:app --host 127.0.0.1 --port 8000 --reload
 ```
 
-Backend runs on `http://localhost:8000`
-API docs available at `http://localhost:8000/docs`
+Backend:
+- API base: http://127.0.0.1:8000/api
+- Swagger: http://127.0.0.1:8000/docs
 
-### Frontend Setup
+### 2) Frontend
+
+In a second terminal:
 
 ```bash
 cd frontend
@@ -49,25 +56,40 @@ npm install
 npm run dev
 ```
 
-Frontend runs on `http://localhost:3000`
+Frontend:
+- App URL: http://localhost:3000
 
-## 📚 Features
+## Quick Start (Docker)
+
+```bash
+docker-compose up --build
+```
+
+Services:
+- Frontend: http://localhost:3000
+- Backend: http://localhost:8000
+- Swagger: http://localhost:8000/docs
+
+## Features
 
 ### 1. Authentication
 - User registration and login
-- JWT token-based security
-- Secure password hashing with bcrypt
+- Role-aware accounts (user/admin)
+- JWT session via httpOnly cookie
+- Password hashing with bcrypt
 
 ### 2. Course Management
-- Create multiple courses
+- Admin course CRUD
 - Add course details (name, description, instructor)
-- Organize assignments by course
+- Enroll users to courses
+- Manage recurring course schedule slots
 
 ### 3. Assignment Management
 - Create assignments with deadlines
-- Set priority levels (low, medium, high)
-- Track assignment status
-- Link assignments to courses
+- Set priority (low/medium/high)
+- Track status (not_started/in_progress/completed)
+- Admin broadcast assignment to all enrolled users
+- Admin grouped view by shared assignment template
 
 ### 4. Subtask Management
 - Break down complex assignments
@@ -75,18 +97,24 @@ Frontend runs on `http://localhost:3000`
 - Visual progress indicators
 
 ### 5. Schedule & Calendar
-- Weekly and daily schedule views
-- Deadline visualization
-- Study session scheduling
-- Easy navigation between weeks
+- Weekly and calendar views
+- Deadlines + study sessions + course sessions
+- Click assignment in schedule to open assignment details
+- 24-hour time format
 
 ### 6. Progress Tracking
-- Overall completion percentage
-- Statistics breakdown
+- Completion percentage
+- Status distribution
 - Upcoming deadlines
-- Motivational feedback
 
-## 📁 Project Structure
+### 7. Notifications
+- In-app notifications for:
+	- added to course,
+	- new assignment,
+	- one-hour reminders before deadline/session
+- Unread notifications persist and are shown after reconnect/login
+
+## Project Structure
 
 ```
 .
@@ -97,12 +125,13 @@ Frontend runs on `http://localhost:3000`
 │   ├── models.py              # SQLAlchemy models
 │   ├── schemas/__init__.py    # Pydantic schemas
 │   ├── routers/               # API route handlers
-│   │   ├── auth.py           # Authentication
-│   │   ├── courses.py        # Course management
-│   │   ├── assignments.py    # Assignment management
-│   │   ├── subtasks.py       # Subtask management
-│   │   ├── progress.py       # Progress tracking
-│   │   └── schedule.py       # Schedule management
+│   │   ├── auth.py            # Authentication
+│   │   ├── courses.py         # Course management
+│   │   ├── assignments.py     # Assignment management
+│   │   ├── subtasks.py        # Subtask management
+│   │   ├── progress.py        # Progress tracking
+│   │   ├── schedule.py        # Schedule management
+│   │   └── notifications.py   # Notification API
 │   ├── requirements.txt       # Python dependencies
 │   ├── .env.example          # Environment template
 │   └── README.md             # Backend documentation
@@ -135,13 +164,15 @@ Frontend runs on `http://localhost:3000`
 └── README.md (this file)
 ```
 
-## 🔌 API Endpoints
+## API Endpoints
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
 | POST | `/api/auth/register` | Register new user |
 | POST | `/api/auth/login` | Login user |
 | GET | `/api/auth/me` | Get current user |
+| POST | `/api/auth/logout` | Logout and clear cookie |
+| GET | `/api/auth/users` | List users (admin) |
 | POST | `/api/courses/` | Create course |
 | GET | `/api/courses/` | Get all courses |
 | PUT | `/api/courses/{id}` | Update course |
@@ -150,30 +181,32 @@ Frontend runs on `http://localhost:3000`
 | GET | `/api/assignments/` | Get all assignments |
 | PUT | `/api/assignments/{id}` | Update assignment |
 | DELETE | `/api/assignments/{id}` | Delete assignment |
-| POST | `/api/subtasks/` | Create subtask |
-| GET | `/api/subtasks/{id}` | Get subtasks |
-| PUT | `/api/subtasks/{id}` | Update subtask |
-| DELETE | `/api/subtasks/{id}` | Delete subtask |
+| POST | `/api/subtasks/{assignment_id}` | Create subtask |
+| GET | `/api/subtasks/{assignment_id}` | Get subtasks |
+| PUT | `/api/subtasks/{subtask_id}` | Update subtask |
+| DELETE | `/api/subtasks/{subtask_id}` | Delete subtask |
 | GET | `/api/progress/stats` | Get progress statistics |
 | GET | `/api/schedule/daily` | Get daily schedule |
 | GET | `/api/schedule/weekly` | Get weekly schedule |
+| GET | `/api/schedule/calendar` | Get monthly calendar |
+| GET | `/api/notifications/unread` | Get unread notifications |
+| POST | `/api/notifications/mark-read` | Mark notifications as read |
 
-## 🔐 Security Features
+## Security Notes
 
-- JWT token-based authentication
+- JWT session in httpOnly cookie
 - Bcrypt password hashing
-- User isolation (users only see their own data)
-- CORS configuration
+- Server-side role and ownership checks
+- Per-user data isolation
 - Input validation with Pydantic
-- Secure token refresh mechanism
 
-## 📊 Database Schema
+## Database Entities
 
 ### Users
 Stores user account information with secure password hashing
 
-### Courses
-Stores course information with instructor details
+### CourseMembers
+Maps users to courses for enrollment access
 
 ### Assignments
 Stores assignments with deadlines, priorities, and status
@@ -184,6 +217,9 @@ Breakdown of complex assignments for better management
 ### StudySessions
 Planned study sessions and events
 
+### Notifications
+Persistent in-app reminders and unread delivery
+
 ## 🎨 UI/UX Features
 
 - Clean, intuitive interface
@@ -193,12 +229,20 @@ Planned study sessions and events
 - Accessibility-friendly components
 - Dark/light ready styling
 
-## 📈 Performance Metrics
+## Running Tests
 
-- API response time: <1 second
-- App load time: <2 seconds
-- Bundle size: Optimized with Vite
-- Supports 10,000+ users
+From project root:
+
+```bash
+pytest
+```
+
+Optional suites are available under the tests directory:
+- integration
+- e2e
+- performance
+- mutation
+- chaos
 
 ## 🛠️ Technology Decisions
 
@@ -226,12 +270,12 @@ Planned study sessions and events
 - No prop drilling
 - DevTools support
 
-## 📝 Development Notes
+## Development Notes
 
-- Frontend and backend can run independently
-- Backend provides OpenAPI documentation at `/docs`
-- Frontend uses axios interceptors for auth token management
-- Both services support hot reloading in development
+- Frontend and backend run independently during development.
+- Backend OpenAPI docs are available at /docs.
+- Frontend uses cookie-based requests with credentials enabled.
+- Both services support hot reload.
 
 ## 🐛 Troubleshooting
 
@@ -245,7 +289,7 @@ Planned study sessions and events
 - Clear cache: `npm cache clean --force`
 - Check Node version: `node --version`
 
-## 🚀 Deployment
+## Deployment
 
 ### Backend (Example with Gunicorn)
 ```bash
@@ -265,7 +309,7 @@ Once the backend is running, access interactive documentation:
 - Swagger UI: `http://localhost:8000/docs`
 - ReDoc: `http://localhost:8000/redoc`
 
-## 👥 User Manual
+## User Manual
 
 ### Getting Started
 1. Register a new account
@@ -287,12 +331,11 @@ Test user credentials will be created when you register. Use the registration pa
 
 ## 🔄 Data Flow
 
-1. User logs in → JWT token received
-2. Token stored in localStorage
-3. Token attached to all API requests
-4. Backend validates token and user ownership
-5. Data returned and cached in Zustand
-6. UI updates reactively
+1. User logs in.
+2. Backend sets JWT in httpOnly cookie.
+3. Frontend calls protected API routes with credentials.
+4. Backend validates cookie token and access scope.
+5. Data is stored in Zustand and rendered in UI.
 
 ## 📞 Support
 
@@ -304,5 +347,5 @@ This project is part of CSE-2507M course assignment.
 
 ---
 
-**Last Updated**: March 2026
+**Last Updated**: May 2026
 **Version**: 1.0.0
